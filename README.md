@@ -1,2 +1,3 @@
-# raspi-io
-Using socket.io control your raspberry pi
+Raspi-io
+========
+Using websocket control your raspberry pi
