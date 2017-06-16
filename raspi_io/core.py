@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
 WS_PORT = 9876
-__all__ = ['WS_PORT', 'get_websocket_address', 'RaspiBasicMsg']
+__all__ = ['WS_PORT', 'get_websocket_url', 'RaspiBasicMsg']
 
 
-def get_websocket_address(host, path):
+def get_websocket_url(host, path):
     return "ws://{0:s}:{1:d}/{2:s}".format(host, WS_PORT, path)
 
 

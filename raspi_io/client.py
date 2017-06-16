@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import websocket
-from .core import get_websocket_address, RaspiBasicMsg
+from .core import get_websocket_url, RaspiBasicMsg
 __all__ = ['RaspiWsClient']
 
 
@@ -8,7 +8,7 @@ class RaspiWsClient(object):
     PATH = ""
 
     def __init__(self, host, timeout=1):
-        self.__ws = websocket.create_connection(get_websocket_address(host, self.PATH), timeout)
+        self.__ws = websocket.create_connection(get_websocket_url(host, self.PATH), timeout)
 
     def send(self, msg):
         try:

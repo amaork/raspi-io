@@ -66,7 +66,7 @@ class GPIOChannel(RaspiBasicMsg):
 
 
 class GPIO(RaspiWsClient):
-    PATH = __name__
+    PATH = __name__.split(".")[-1]
 
     BCM = GPIOMode.BCM
     BOARD = GPIOMode.BOARD
