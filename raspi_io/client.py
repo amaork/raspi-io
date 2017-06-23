@@ -7,8 +7,8 @@ __all__ = ['RaspiWsClient']
 class RaspiWsClient(object):
     PATH = ""
 
-    def __init__(self, host, timeout=1):
-        self.__ws = websocket.create_connection(get_websocket_url(host, self.PATH), timeout)
+    def __init__(self, address, timeout=1):
+        self.__ws = websocket.create_connection(get_websocket_url(address, self.PATH), timeout)
 
     def send(self, msg):
         try:
