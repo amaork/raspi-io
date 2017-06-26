@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-__all__ = ['get_websocket_url', 'RaspiBasicMsg']
+__all__ = ['get_websocket_url', 'RaspiBasicMsg', 'RaspiAckMsg']
 
 
 def get_websocket_url(address, path):
@@ -70,3 +70,10 @@ class RaspiBasicMsg(object):
         :return:
         """
         return json.dumps(self.__dict__)
+
+
+class RaspiAckMsg(RaspiBasicMsg):
+    _properties = ('ack', 'data')
+
+    def __init__(self, **kwargs):
+        super(RaspiAckMsg, self).__init__(**kwargs)

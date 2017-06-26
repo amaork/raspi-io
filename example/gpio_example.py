@@ -4,13 +4,16 @@ from raspi_io import GPIO
 
 
 if __name__ == "__main__":
+    io = [20, 21]
     gpio = GPIO(("192.168.1.166", 9876))
 
     gpio.setmode(GPIO.BCM)
-    gpio.setup(21, GPIO.OUT)
+    gpio.setup(io, GPIO.OUT)
 
-    gpio.output(21, 1)
-    gpio.output(21, 0)
+    gpio.output(io, 1)
+    gpio.output(io, 0)
+    gpio.output(io, [1, 0])
+    gpio.output(io, [0, 1])
 
     gpio.setup(21, GPIO.IN)
     print(gpio.input(21))

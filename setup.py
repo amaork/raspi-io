@@ -16,7 +16,7 @@ with open(version_module) as f:
 py_version = sys.version_info[:2]
 
 if py_version < (2, 7):
-    raise Exception("raspi_io requires Python >= 2.7.")
+    raise Exception("raspi_io requires Python >= 2.7")
 
 packages = ['raspi_io']
 
@@ -37,6 +37,6 @@ setuptools.setup(
     ],
     packages=packages,
     extras_require={
-        ':python_version>="2.7"': ['websocket_client'],
+        'websocket_client': ['websocket_client'],
     },
 )

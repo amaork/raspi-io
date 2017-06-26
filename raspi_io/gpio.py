@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import uuid
-from .core import RaspiBasicMsg
 from .client import RaspiWsClient
+from .core import RaspiBasicMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode',
            'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl']
 
@@ -104,21 +104,24 @@ class GPIO(RaspiWsClient):
         super(GPIO, self).__init__(address, timeout)
 
     def setmode(self, mode):
-        self.send(GPIOMode(mode=mode))
+        self._transfer(GPIOMode(mode=mode))
 
     def input(self, channel):
-        self.send(GPIOChannel(channel=channel))
-        data = GPIOChannel().loads(self.recv())
+        ack = self._transfer(GPIOChannel(channel=channel))
+        if not isinstance(ack, RaspiAckMsg):
+            return None
+
+        data = GPIOChannel().loads(ack.data)
         if not isinstance(data, GPIOChannel):
             return None
 
         return data.value
 
     def output(self, channel, value):
-        self.send(GPIOCtrl(channel=channel, value=value))
+        self._transfer(GPIOCtrl(channel=channel, value=value))
 
     def setup(self, channel, direction, pull_up_down=PUD_OFF, initial=LOW):
-        self.send(GPIOSetup(channel=channel, direction=direction, pull_up_down=pull_up_down, initial=initial))
+        self._transfer(GPIOSetup(channel=channel, direction=direction, pull_up_down=pull_up_down, initial=initial))
 
 
 class SoftPWM(RaspiWsClient):
@@ -126,11 +129,11 @@ class SoftPWM(RaspiWsClient):
 
     def __init__(self, address, mode, channel, frequency, timeout=1):
         super(SoftPWM, self).__init__(address, timeout)
-        self.send(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))
+        self._transfer(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))
         self.uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, '{0:d},{1:d},{2:d}'.format(mode, channel, frequency)))
 
     def start(self, duty):
-        self.send(GPIOSoftPWMCtrl(uuid=self.uuid, duty=duty))
+        self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid, duty=duty))
 
     def stop(self):
-        self.send(GPIOSoftPWMCtrl(uuid=self.uuid))
+        self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid))
