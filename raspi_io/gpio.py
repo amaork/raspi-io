@@ -108,7 +108,7 @@ class GPIO(RaspiWsClient):
 
     def input(self, channel):
         ack = self._transfer(GPIOChannel(channel=channel))
-        if not isinstance(ack, RaspiAckMsg):
+        if not isinstance(ack, RaspiAckMsg) or not ack.ack:
             return None
 
         data = GPIOChannel().loads(ack.data)
