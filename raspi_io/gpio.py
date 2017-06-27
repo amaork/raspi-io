@@ -129,11 +129,20 @@ class SoftPWM(RaspiWsClient):
 
     def __init__(self, address, mode, channel, frequency, timeout=1):
         super(SoftPWM, self).__init__(address, timeout)
+        self.__state = False
         self._transfer(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))
         self.uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, '{0:d},{1:d},{2:d}'.format(mode, channel, frequency)))
 
+    def __del__(self):
+        self.stop()
+
     def start(self, duty):
-        self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid, duty=duty))
+        ret = self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid, duty=duty))
+        self.__state = ret.ack if isinstance(ret, RaspiAckMsg) else False
 
     def stop(self):
-        self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid))
+        ret = self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid))
+        self.__state = False if isinstance(ret, RaspiAckMsg) and ret.ack else self.__state
+
+    def is_running(self):
+        return self.__state

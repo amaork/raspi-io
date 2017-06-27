@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.5
 
 from raspi_io import SoftPWM, GPIO
 

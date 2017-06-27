@@ -1,2 +1,2 @@
-from .gpio import *
-__all__ = ['GPIO']
+from .gpio import GPIO, SoftPWM
+__all__ = ['GPIO', 'SoftPWM']

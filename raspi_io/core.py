@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
-__all__ = ['get_websocket_url', 'RaspiBasicMsg', 'RaspiAckMsg']
+__all__ = ['get_websocket_url', 'RaspiBasicMsg', 'RaspiAckMsg', 'RaspiMsgDecodeError']
 
 
 def get_websocket_url(address, path):
     return "ws://{0:s}:{1:d}/{2:s}".format(address[0], address[1], path)
+
+
+class RaspiMsgDecodeError(Exception):
+    pass
 
 
 class RaspiBasicMsg(object):
@@ -45,24 +49,23 @@ class RaspiBasicMsg(object):
         :return: success return object or NONE
         """
         if not isinstance(data, str):
-            return None
+            raise RaspiMsgDecodeError("TypeError, data must be str, not {!r}".format(data.__class__.__name__))
 
         try:
 
             dict_ = json.loads(data)
             if not isinstance(dict_, dict):
-                return None
+                raise RaspiMsgDecodeError("Decode error, do not found any dict object data")
 
             for key in self._properties:
                 if dict_.get(key) is None:
-                    print("{0:s} Unknown key:{1:s}".format(self.__class__.__name__, key))
-                    return None
+                    raise RaspiMsgDecodeError("Decode as {!r} error, do not found key:{!r}".format(
+                        self.__class__.__name__, key))
 
             return self.__class__(**dict_)
 
-        except ValueError as e:
-            print("Decode object '{0}' has error:{1}".format(type(self), e))
-            return None
+        except json.JSONDecodeError as e:
+            raise RaspiMsgDecodeError("Decode error:{}".format(e))
 
     def dumps(self):
         """Encode data to a dict string
