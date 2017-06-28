@@ -9,9 +9,11 @@ Using websocket control your raspberry pi, raspberry pi needs run a [RaspiIOServ
 
 ## Interface
 
-    GPIO: usage same as RPi.GPIO, but needs a address (host, port) 
+    GPIO: usage same as RPi.GPIO
     
-    SoftPWM: usage same as RPi.GPIO.PWM, but needs a address (host, port)
+    SoftPWM: usage same as RPi.GPIO.PWM
+    
+    Serial: support read/write/close/flushInput/flushOutput
     
 ## GPIO Usage
 
@@ -46,6 +48,28 @@ Using websocket control your raspberry pi, raspberry pi needs run a [RaspiIOServ
     
     # Stop
     pwm.stop()
+    
+## Serial usage
+
+    from raspi_io import Serial
+    
+    # Open a serial port /dev/ttyUSB0, 115200 baudrate
+    port = Serial(('192.168.1.100', 12345), '/dev/ttyUSB0', 115200)
+    
+    # Read
+    ret, data = port.read(1024)
+    if not ret:
+        print("Read error:{}".format(data))
+        
+    # Write
+    ret, data = port.write("1234567")
+    if not ret:
+        print("Write error:{}".format(data))
+    else:
+        print("Success write:{} bytes".format(data))
+        
+    # Close
+    port.close()
   
 
 

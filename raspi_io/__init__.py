@@ -1,2 +1,3 @@
 from .gpio import GPIO, SoftPWM
-__all__ = ['GPIO', 'SoftPWM']
+from .serial import Serial
+__all__ = ['GPIO', 'SoftPWM', 'Serial']
