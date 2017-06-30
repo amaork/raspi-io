@@ -74,7 +74,7 @@ Using websocket control your raspberry pi, raspberry pi needs run a [RaspiIOServ
     # Close
     port.close()
     
-# Query usage
+## Query usage
 
     from raspi_io import Query
     

@@ -123,11 +123,7 @@ class GPIO(RaspiWsClient):
         if not isinstance(ack, RaspiAckMsg) or not ack.ack:
             return None
 
-        data = GPIOChannel().loads(ack.data)
-        if not isinstance(data, GPIOChannel):
-            return None
-
-        return data.value
+        return ack.data
 
     def cleanup(self, channel):
         self._transfer(GPIOCleanup(channel=channel))

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     gpio.output(io, [1, 0])
     gpio.output(io, [0, 1])
 
-    gpio.setup(21, GPIO.IN)
+    gpio.setup(21, GPIO.IN, GPIO.PUD_DOWN)
     print(gpio.input(21))
     print(gpio.input(21))
     print(gpio.input(21))
