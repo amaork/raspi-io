@@ -6,8 +6,11 @@ Using websocket control your raspberry pi, raspberry pi needs run a [RaspiIOServ
 
 - Support Python 2.7+, Python3+
 - Support GPIO、Software PWM, API same as RPi.GPIO
+- Support query raspi hardware information, such as: Serial No.、MAC address, device list etc
 
 ## Interface
+
+    Query: query raspi info
 
     GPIO: usage same as RPi.GPIO
     
@@ -70,6 +73,23 @@ Using websocket control your raspberry pi, raspberry pi needs run a [RaspiIOServ
         
     # Close
     port.close()
+    
+# Query usage
+
+    from raspi_io import Query
+    
+    # Create a query instance
+    q = Query(("192.168,1,100", 12345))
+    
+    # Get hardware information
+    info = q.get_hardware_info()
+    
+    # Error process
+    if not info:
+        pass
+        
+    hardware, revision, sn = info
+    
+    # Get seril port list
+    l = q.get_serial_list()
   
-
-
