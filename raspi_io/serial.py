@@ -22,7 +22,7 @@ class SerialClose(RaspiAckMsg):
 
 class SerialRead(RaspiBasicMsg):
     _handle = 'read'
-    _properties = ('port', 'size')
+    _properties = ('size',)
 
     def __init__(self, **kwargs):
         super(SerialRead, self).__init__(**kwargs)
@@ -30,7 +30,7 @@ class SerialRead(RaspiBasicMsg):
 
 class SerialWrite(RaspiBasicMsg):
     _handle = 'write'
-    _properties = ('port', 'data')
+    _properties = ('data',)
 
     def __init__(self, **kwargs):
         super(SerialWrite, self).__init__(**kwargs)
@@ -41,7 +41,7 @@ class SerialFlush(RaspiBasicMsg):
     OUT = 2
     BOTH = 3
     _handle = 'flush'
-    _properties = ('port', 'where')
+    _properties = ('where',)
 
     def __init__(self, **kwargs):
         super(SerialFlush, self).__init__(**kwargs)
@@ -87,7 +87,7 @@ class Serial(RaspiWsClient):
         :param size: read size
         :return: result, data or error
         """
-        ret = self._transfer(SerialRead(port=self.__port, size=size))
+        ret = self._transfer(SerialRead(size=size))
         if not isinstance(ret, RaspiAckMsg):
             return False, "Receive ack error:{}".format(ret)
 
@@ -99,17 +99,17 @@ class Serial(RaspiWsClient):
         :param data: write data
         :return: result, error or write length
         """
-        ret = self._transfer(SerialWrite(port=self.__port, data=data))
+        ret = self._transfer(SerialWrite(data=data))
         if not isinstance(ret, RaspiAckMsg):
             return False, "Receive ack error:{}".format(ret)
 
         return ret.ack, ret.data
 
     def flush(self):
-        self._transfer(SerialFlush(port=self.__port, where=SerialFlush.BOTH))
+        self._transfer(SerialFlush(where=SerialFlush.BOTH))
 
     def flushInput(self):
-        self._transfer(SerialFlush(port=self.__port, where=SerialFlush.IN))
+        self._transfer(SerialFlush(where=SerialFlush.IN))
 
     def flushOutput(self):
-        self._transfer(SerialFlush(port=self.__port, where=SerialFlush.OUT))
+        self._transfer(SerialFlush(where=SerialFlush.OUT))
