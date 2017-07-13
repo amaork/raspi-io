@@ -1,3 +1,4 @@
+import six
 import unittest
 from raspi_io import Query
 
@@ -27,7 +28,7 @@ class TestQuery(unittest.TestCase):
     def test_query_interface_address(self):
         for interface in self.query.get_iface_list():
             address = self.query.get_ethernet_addr(interface)
-            self.assertIsInstance(address, str)
+            self.assertIsInstance(address, six.string_types)
             self.assertEqual(address.count(":"), 5)
 
 

@@ -6,6 +6,9 @@ class TestGPIO(unittest.TestCase):
     def setUp(self):
         self.gpio = GPIO(('192.168.1.166', 9876), verbose=0)
 
+    def tearDown(self):
+        del self.gpio
+
     def test_setmode(self):
         self.assertEqual(self.gpio.setmode(123), False)
         self.assertEqual(self.gpio.setmode(GPIO.BCM), True)

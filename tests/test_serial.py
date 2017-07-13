@@ -9,6 +9,9 @@ class TestSerial(unittest.TestCase):
         name_list = query.get_serial_list()
         self.serial_list = [Serial(address=address, port=name, baudrate=115200, verbose=0) for name in name_list]
 
+    def tearDown(self):
+        del self.serial_list
+
     def test_open(self):
         for port in self.serial_list:
             self.assertEqual(port.is_open(), True)
