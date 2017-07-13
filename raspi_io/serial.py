@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
-from .core import RaspiBasicMsg, RaspiAckMsg
+from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['SerialInit', 'SerialClose', 'SerialRead', 'SerialWrite', 'SerialFlush', 'Serial']
 
 
-class SerialInit(RaspiBasicMsg):
+class SerialInit(RaspiBaseMsg):
     _handle = 'init'
     _properties = ('port', 'baudrate', 'bytesize', 'parity', 'stopbits', 'timeout')
 
@@ -20,7 +20,7 @@ class SerialClose(RaspiAckMsg):
         super(SerialClose, self).__init__(**kwargs)
 
 
-class SerialRead(RaspiBasicMsg):
+class SerialRead(RaspiBaseMsg):
     _handle = 'read'
     _properties = ('size',)
 
@@ -28,7 +28,7 @@ class SerialRead(RaspiBasicMsg):
         super(SerialRead, self).__init__(**kwargs)
 
 
-class SerialWrite(RaspiBasicMsg):
+class SerialWrite(RaspiBaseMsg):
     _handle = 'write'
     _properties = ('data',)
 
@@ -36,7 +36,7 @@ class SerialWrite(RaspiBasicMsg):
         super(SerialWrite, self).__init__(**kwargs)
 
 
-class SerialFlush(RaspiBasicMsg):
+class SerialFlush(RaspiBaseMsg):
     IN = 1
     OUT = 2
     BOTH = 3
@@ -50,7 +50,7 @@ class SerialFlush(RaspiBasicMsg):
 class Serial(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, port, baudrate, bytesize=8, parity='N', stopbits=1, socket_timeout=1):
+    def __init__(self, address, port, baudrate, bytesize=8, parity='N', stopbits=1, socket_timeout=1, verbose=1):
         """Raspi Ws Serial
 
         :param address: raspi io server address
@@ -61,7 +61,7 @@ class Serial(RaspiWsClient):
         :param stopbits:serial port stopbits
         :param socket_timeout: low level websocket timeout
         """
-        super(Serial, self).__init__(address, socket_timeout)
+        super(Serial, self).__init__(address, socket_timeout, verbose)
         self.__port = port
         self.__opened = False
         ret = self._transfer(SerialInit(

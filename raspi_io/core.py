@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-__all__ = ['get_websocket_url', 'RaspiBasicMsg', 'RaspiAckMsg', 'RaspiMsgDecodeError']
+__all__ = ['get_websocket_url', 'RaspiBaseMsg', 'RaspiAckMsg', 'RaspiMsgDecodeError']
 
 
 def get_websocket_url(address, path):
@@ -11,13 +11,23 @@ class RaspiMsgDecodeError(Exception):
     pass
 
 
-class RaspiBasicMsg(object):
+class RaspiBaseMsg(object):
     _handle = ""
     _properties = ()
 
     def __init__(self, **kwargs):
         kwargs.setdefault('handle', self._handle)
-        self.__dict__.update(**kwargs)
+
+        try:
+
+            for key in self._properties:
+                if kwargs.get(key) is None:
+                    raise KeyError("do not found key:{!r}".format(key))
+
+            self.__dict__.update(**kwargs)
+
+        except (TypeError, KeyError, ValueError, RaspiMsgDecodeError) as e:
+            raise RaspiMsgDecodeError("Decode {!r} error:{}".format(self.__class__.__name__, e))
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -42,31 +52,6 @@ class RaspiBasicMsg(object):
             msg = "'{0}' object has no attribute '{1}'"
             raise AttributeError(msg.format(type(self).__name__, name))
 
-    def loads(self, data):
-        """Decode data
-
-        :param data: encoded data, should be a str
-        :return: success return object or NONE
-        """
-        if not isinstance(data, str):
-            raise RaspiMsgDecodeError("TypeError, data must be str, not {!r}".format(data.__class__.__name__))
-
-        try:
-
-            dict_ = json.loads(data)
-            if not isinstance(dict_, dict):
-                raise RaspiMsgDecodeError("Decode error, do not found any dict object data")
-
-            for key in self._properties:
-                if dict_.get(key) is None:
-                    raise RaspiMsgDecodeError("Decode as {!r} error, do not found key:{!r}".format(
-                        self.__class__.__name__, key))
-
-            return self.__class__(**dict_)
-
-        except json.JSONDecodeError as e:
-            raise RaspiMsgDecodeError("Decode error:{}".format(e))
-
     def dumps(self):
         """Encode data to a dict string
 
@@ -75,7 +60,7 @@ class RaspiBasicMsg(object):
         return json.dumps(self.__dict__)
 
 
-class RaspiAckMsg(RaspiBasicMsg):
+class RaspiAckMsg(RaspiBaseMsg):
     _properties = ('ack', 'data')
 
     def __init__(self, **kwargs):

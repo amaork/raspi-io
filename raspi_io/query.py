@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
-from .core import RaspiBasicMsg, RaspiAckMsg
+from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['Query', 'QueryDevice', 'QueryHardware']
 
 
-class QueryHardware(RaspiBasicMsg):
+class QueryHardware(RaspiBaseMsg):
     HARDWARE = 0
     ETHERNET = 1
     _handle = 'query_hardware'
@@ -15,7 +15,7 @@ class QueryHardware(RaspiBasicMsg):
         super(QueryHardware, self).__init__(**kwargs)
 
 
-class QueryDevice(RaspiBasicMsg):
+class QueryDevice(RaspiBaseMsg):
     I2C = 0
     SPI = 1
     ETH = 2
@@ -32,8 +32,8 @@ class QueryDevice(RaspiBasicMsg):
 class Query(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, timeout=1):
-        super(Query, self).__init__(address, timeout)
+    def __init__(self, address, timeout=1, verbose=1):
+        super(Query, self).__init__(address, timeout, verbose)
 
     def basic_query(self, query):
         ret = self._transfer(query)
