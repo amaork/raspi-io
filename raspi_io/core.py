@@ -13,7 +13,7 @@ class RaspiMsgDecodeError(Exception):
 
 class RaspiBaseMsg(object):
     _handle = ""
-    _properties = ()
+    _properties = set()
 
     def __init__(self, **kwargs):
         kwargs.setdefault('handle', self._handle)
@@ -61,7 +61,7 @@ class RaspiBaseMsg(object):
 
 
 class RaspiAckMsg(RaspiBaseMsg):
-    _properties = ('ack', 'data')
+    _properties = {'ack', 'data'}
 
     def __init__(self, **kwargs):
         super(RaspiAckMsg, self).__init__(**kwargs)

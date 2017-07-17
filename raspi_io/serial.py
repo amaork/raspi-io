@@ -6,7 +6,7 @@ __all__ = ['SerialInit', 'SerialClose', 'SerialRead', 'SerialWrite', 'SerialFlus
 
 class SerialInit(RaspiBaseMsg):
     _handle = 'init'
-    _properties = ('port', 'baudrate', 'bytesize', 'parity', 'stopbits', 'timeout')
+    _properties = {'port', 'baudrate', 'bytesize', 'parity', 'stopbits', 'timeout'}
 
     def __init__(self, **kwargs):
         super(SerialInit, self).__init__(**kwargs)
@@ -14,7 +14,7 @@ class SerialInit(RaspiBaseMsg):
 
 class SerialClose(RaspiAckMsg):
     _handle = 'close'
-    _properties = ('port',)
+    _properties = {'port'}
 
     def __init__(self, **kwargs):
         super(SerialClose, self).__init__(**kwargs)
@@ -22,7 +22,7 @@ class SerialClose(RaspiAckMsg):
 
 class SerialRead(RaspiBaseMsg):
     _handle = 'read'
-    _properties = ('size',)
+    _properties = {'size'}
 
     def __init__(self, **kwargs):
         super(SerialRead, self).__init__(**kwargs)
@@ -30,7 +30,7 @@ class SerialRead(RaspiBaseMsg):
 
 class SerialWrite(RaspiBaseMsg):
     _handle = 'write'
-    _properties = ('data',)
+    _properties = {'data'}
 
     def __init__(self, **kwargs):
         super(SerialWrite, self).__init__(**kwargs)
@@ -41,7 +41,7 @@ class SerialFlush(RaspiBaseMsg):
     OUT = 2
     BOTH = 3
     _handle = 'flush'
-    _properties = ('where',)
+    _properties = {'where'}
 
     def __init__(self, **kwargs):
         super(SerialFlush, self).__init__(**kwargs)

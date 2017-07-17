@@ -8,7 +8,7 @@ class QueryHardware(RaspiBaseMsg):
     HARDWARE = 0
     ETHERNET = 1
     _handle = 'query_hardware'
-    _properties = ('query', 'params')
+    _properties = {'query', 'params'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('params', "")
@@ -22,7 +22,7 @@ class QueryDevice(RaspiBaseMsg):
     SERIAL = 3
     FILTER = 4
     _handle = 'query_device'
-    _properties = ('query', 'filter')
+    _properties = {'query', 'filter'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('filter', "")

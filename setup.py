@@ -36,7 +36,5 @@ setuptools.setup(
         'Programming Language :: Python :: 3',
     ],
     packages=packages,
-    extras_require={
-        'websocket_client': ['websocket_client'],
-    },
+    install_requires=['websocket_client']
 )

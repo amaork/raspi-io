@@ -10,7 +10,7 @@ class GPIOMode(RaspiBaseMsg):
     BCM = 11
     BOARD = 10
     _handle = 'setmode'
-    _properties = ('mode',)
+    _properties = {'mode'}
 
     def __init__(self, **kwargs):
         super(GPIOMode, self).__init__(**kwargs)
@@ -20,7 +20,7 @@ class GPIOCtrl(RaspiBaseMsg):
     LOW = 0
     HIGH = 1
     _handle = 'output'
-    _properties = ('channel', 'value')
+    _properties = {'channel', 'value'}
 
     def __init__(self, **kwargs):
         super(GPIOCtrl, self).__init__(**kwargs)
@@ -32,7 +32,7 @@ class GPIOEvent(RaspiBaseMsg):
     FALLING = 32
     BOTH = 33
     _handle = 'event'
-    _properties = ('channel', 'edge', 'callback')
+    _properties = {'channel', 'edge', 'callback'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('edge', None)
@@ -50,7 +50,7 @@ class GPIOSetup(RaspiBaseMsg):
     PUD_OFF = 20
     PUD_UP = 22
     _handle = 'setup'
-    _properties = ('channel', 'direction', 'pull_up_down', 'initial')
+    _properties = {'channel', 'direction', 'pull_up_down', 'initial'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('initial', GPIOCtrl.LOW)
@@ -60,7 +60,7 @@ class GPIOSetup(RaspiBaseMsg):
 
 class GPIOCleanup(RaspiBaseMsg):
     _handle = 'cleanup'
-    _properties = ('channel',)
+    _properties = {'channel'}
 
     def __init__(self, **kwargs):
         super(GPIOCleanup, self).__init__(**kwargs)
@@ -68,7 +68,7 @@ class GPIOCleanup(RaspiBaseMsg):
 
 class GPIOChannel(RaspiBaseMsg):
     _handle = 'input'
-    _properties = ('channel', 'value')
+    _properties = {'channel', 'value'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('value', 0)
@@ -77,7 +77,7 @@ class GPIOChannel(RaspiBaseMsg):
 
 class GPIOSoftPWM(RaspiBaseMsg):
     _handle = 'pwm_init'
-    _properties = ('mode', 'channel', 'frequency')
+    _properties = {'mode', 'channel', 'frequency'}
 
     def __init__(self, **kwargs):
         super(GPIOSoftPWM, self).__init__(**kwargs)
@@ -85,7 +85,7 @@ class GPIOSoftPWM(RaspiBaseMsg):
 
 class GPIOSoftPWMCtrl(RaspiBaseMsg):
     _handle = 'pwm_ctrl'
-    _properties = ('uuid', 'duty')
+    _properties = {'uuid', 'duty'}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('duty', 0)
