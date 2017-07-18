@@ -8,5 +8,5 @@ if __name__ == "__main__":
         print("Ethernet interface:{}:{}".format(iface, q.get_ethernet_addr(iface)))
     print("I2C device list:{}".format(q.get_i2c_list()))
     print("SPI device list:{}".format(q.get_spi_list()))
-    print("Serial port list{}".format(q.get_serial_list()))
-    print("MMC block:{}".format(q.get_device_list("^mmcblk[0-9]*")))
+    print("Serial port list{}".format(q.get_serial_list(include_links=True)))
+    print("MMC block:{}".format(q.get_device_list("mmcblk*")))

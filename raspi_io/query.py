@@ -22,9 +22,10 @@ class QueryDevice(RaspiBaseMsg):
     SERIAL = 3
     FILTER = 4
     _handle = 'query_device'
-    _properties = {'query', 'filter'}
+    _properties = {'query', 'filter', 'option'}
 
     def __init__(self, **kwargs):
+        kwargs.setdefault('option', "")
         kwargs.setdefault('filter', "")
         super(QueryDevice, self).__init__(**kwargs)
 
@@ -75,12 +76,12 @@ class Query(RaspiWsClient):
         """
         return self.basic_query(QueryDevice(query=QueryDevice.SPI))
 
-    def get_serial_list(self):
+    def get_serial_list(self, include_links=False):
         """Get serial port list
 
         :return: None or serial device name list
         """
-        return self.basic_query(QueryDevice(query=QueryDevice.SERIAL))
+        return self.basic_query(QueryDevice(query=QueryDevice.SERIAL, option=include_links))
 
     def get_device_list(self, query_filter):
         """Query self define query
