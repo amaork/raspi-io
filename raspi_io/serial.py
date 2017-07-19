@@ -51,7 +51,7 @@ class SerialFlush(RaspiBaseMsg):
 class Serial(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, port, baudrate, bytesize=8, parity='N', stopbits=1, socket_timeout=1, verbose=1):
+    def __init__(self, address, port, baudrate, bytesize=8, parity='N', stopbits=1, timeout=1, verbose=1):
         """Raspi Ws Serial
 
         :param address: raspi io server address
@@ -60,13 +60,13 @@ class Serial(RaspiWsClient):
         :param bytesize: serial port bytesize
         :param parity: serial port parity
         :param stopbits:serial port stopbits
-        :param socket_timeout: low level websocket timeout
+        :param timeout: serial port read timeout
         """
-        super(Serial, self).__init__(address, socket_timeout, verbose)
+        super(Serial, self).__init__(address, timeout * 2, verbose)
         self.__port = port
         self.__opened = False
         ret = self._transfer(SerialInit(
-            port=port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits, timeout=0))
+            port=port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits, timeout=timeout))
         self.__opened = ret.ack if isinstance(ret, RaspiAckMsg) else False
         if not self.is_open():
             raise RuntimeError(ret.data)
