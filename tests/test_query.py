@@ -5,7 +5,7 @@ from raspi_io import Query
 
 class TestQuery(unittest.TestCase):
     def setUp(self):
-        self.query = Query(('192.168.1.166', 9876))
+        self.query = Query('192.168.1.166')
 
     def test_query_info(self):
         info = self.query.get_hardware_info()

@@ -6,11 +6,10 @@ from raspi_io import Query, I2C
 
 class I2CTest(unittest.TestCase):
     def setUp(self):
-        address = ('192.168.1.166', 9876)
-        query = Query(address)
+        query = Query('192.168.1.166')
         devices = query.get_i2c_list()
         self.assertGreaterEqual(len(devices), 1)
-        self.i2c = I2C(address, devices[0], 0x56)
+        self.i2c = I2C('192.168.1.166', devices[0], 0x56)
         self.i2c_size = 256
 
     def tearDown(self):

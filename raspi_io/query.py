@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
+from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['Query', 'QueryDevice', 'QueryHardware']
 
@@ -33,8 +34,8 @@ class QueryDevice(RaspiBaseMsg):
 class Query(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, timeout=1, verbose=1):
-        super(Query, self).__init__(address, timeout, verbose)
+    def __init__(self, host, timeout=1, verbose=1):
+        super(Query, self).__init__((host, get_server_port(host, self.PATH, self.PATH)), timeout, verbose)
 
     def basic_query(self, query):
         ret = self._transfer(query)

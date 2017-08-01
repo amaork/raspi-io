@@ -4,7 +4,7 @@ from raspi_io import SoftPWM, GPIO
 
 class TestSoftPWM(unittest.TestCase):
     def setUp(self):
-        self.pwm = SoftPWM(('192.168.1.166', 9876), GPIO.BCM, 21, 1000, verbose=0)
+        self.pwm = SoftPWM('192.168.1.166', GPIO.BCM, 21, 1000, verbose=0)
 
     def tearDown(self):
         del self.pwm

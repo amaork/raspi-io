@@ -4,7 +4,7 @@ from raspi_io import GPIO
 
 class TestGPIO(unittest.TestCase):
     def setUp(self):
-        self.gpio = GPIO(('192.168.1.166', 9876), verbose=0)
+        self.gpio = GPIO('192.168.1.166', verbose=0)
 
     def tearDown(self):
         del self.gpio

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 from .client import RaspiWsClient
+from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['I2C', 'I2COpen', 'I2CClose', 'I2CRead', 'I2CWrite', 'I2CDevice']
 
@@ -56,10 +57,10 @@ class I2CDevice(RaspiBaseMsg):
 class I2C(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, bus, device_address, tenbit=0, flags=0, delay=5, iaddr_bytes=1, timeout=1):
+    def __init__(self, host, bus, device_address, tenbit=0, flags=0, delay=5, iaddr_bytes=1, timeout=1):
         """Init a i2c instance
 
-        :param address: raspi-io server address
+        :param host: raspi-io server address
         :param bus: i2c bus name
         :param device_address: i2c device address not internal address
         :param tenbit: if set i2c device address is tenbit
@@ -68,7 +69,7 @@ class I2C(RaspiWsClient):
         :param iaddr_bytes: i2c internal address bytes
         :param timeout: raspi-io timeout unit second
         """
-        super(I2C, self).__init__(address, timeout)
+        super(I2C, self).__init__((host, get_server_port(host, self.PATH, bus)), timeout)
         self.__opened = False
         self.__device = I2CDevice(
             bus=bus, addr=device_address, tenbit=tenbit, flags=flags, delay=delay, iaddr_bytes=iaddr_bytes

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import uuid
 from .client import RaspiWsClient
+from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode', 'GPIOCleanup',
            'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl']
@@ -108,8 +109,8 @@ class GPIO(RaspiWsClient):
     PUD_OFF = GPIOSetup.PUD_OFF
     PUD_DOWN = GPIOSetup.PUD_DOWN
 
-    def __init__(self, address, timeout=1, verbose=1):
-        super(GPIO, self).__init__(address, timeout, verbose)
+    def __init__(self, host, timeout=1, verbose=1):
+        super(GPIO, self).__init__((host, get_server_port(host, self.PATH, self.PATH)), timeout, verbose)
         self.__registered = set()
 
     def __del__(self):
@@ -151,8 +152,8 @@ class GPIO(RaspiWsClient):
 class SoftPWM(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, mode, channel, frequency, timeout=1, verbose=1):
-        super(SoftPWM, self).__init__(address, timeout, verbose)
+    def __init__(self, host, mode, channel, frequency, timeout=1, verbose=1):
+        super(SoftPWM, self).__init__((host, get_server_port(host, self.PATH, self.PATH)), timeout, verbose)
         self.__state = False
         self.__channel = channel
         self._transfer(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))

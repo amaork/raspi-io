@@ -6,10 +6,9 @@ from raspi_io import Serial, Query
 
 class TestSerial(unittest.TestCase):
     def setUp(self):
-        address = ('192.168.1.166', 9876)
-        query = Query(address)
+        query = Query('192.168.1.166')
         name_list = query.get_serial_list()
-        self.serial_list = [Serial(address, name, 115200, verbose=0) for name in name_list]
+        self.serial_list = [Serial('192.168.1.166', name, 115200, verbose=0) for name in name_list]
 
     def tearDown(self):
         del self.serial_list

@@ -5,7 +5,7 @@ from raspi_io import GPIO
 
 if __name__ == "__main__":
     io = [20, 21]
-    gpio = GPIO(("192.168.1.166", 9876))
+    gpio = GPIO("192.168.1.166")
 
     gpio.setmode(GPIO.BCM)
     gpio.setup(io, GPIO.OUT)

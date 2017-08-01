@@ -2,7 +2,7 @@
 from raspi_io import Query
 
 if __name__ == "__main__":
-    q = Query(("192.168.1.166", 9876))
+    q = Query("192.168.1.166")
     print("Hardware info:{}".format(q.get_hardware_info()))
     for iface in q.get_iface_list():
         print("Ethernet interface:{}:{}".format(iface, q.get_ethernet_addr(iface)))

@@ -15,6 +15,14 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
 
 2. Second install `raspi-io` on your computer, `sudo python setup.py install`
 
+## Default port
+
+`raspi_io` default using port **`9876`** communicate with [RaspiIOServer](https://github.com/amaork/raspi-ios "RaspiIOServer"), but if `RaspiIOServer` port changed, your can specify default port like this:
+
+    import raspi_io
+    raspi_io.core.DEFAULT_PORT = xxxx
+
+
 ## Interface
 
     Query: query raspi info
@@ -33,7 +41,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     from raspi_io import I2C
 
     # Open /dev/i2c-1, you can using Query.get_i2c_list() get i2c bus list
-    i2c = I2C(('192.168.1.100', 12345), '/dev/i2c-1', 0x56)
+    i2c = I2C('192.168.1.166', '/dev/i2c-1', 0x56)
 
     # Python2, 3, both can using ctypes.create_string_buffer() create a buffer
     buf = ctypes.create_string_buffer(256)
@@ -54,7 +62,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     from raspi_io import GPIO
 
     # Create a gpio instance
-    gpio = GPIO(('192.168.1.100', 12345))
+    gpio = GPIO('192.168.1.166')
 
     # Set as BCM mode
     gpio.setmode(GPIO.BCM)
@@ -75,7 +83,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     from raspi_io import GPIO, SoftPWM
 
     # Create a software pwm instance, BCM mode, pin21, 1000hz
-    pwm = SoftPWM(('192.168.1.100', 12345), GPIO.BCM, 21, 1000)
+    pwm = SoftPWM('192.168.1.166', GPIO.BCM, 21, 1000)
 
     # Start pwm duty
     pwm.start(80)
@@ -88,7 +96,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     from raspi_io import Serial
 
     # Open a serial port /dev/ttyUSB0, 115200 baudrate
-    port = Serial(('192.168.1.100', 12345), '/dev/ttyUSB0', 115200)
+    port = Serial('192.168.1.166', '/dev/ttyUSB0', 115200)
 
     # Read
     ret, data = port.read(1024)
@@ -110,7 +118,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     from raspi_io import Query
 
     # Create a query instance
-    q = Query(("192.168,1,100", 12345))
+    q = Query("192.168,1,166")
 
     # Get hardware information
     info = q.get_hardware_info()

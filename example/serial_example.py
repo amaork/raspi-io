@@ -5,9 +5,9 @@ from raspi_io import Serial
 
 if __name__ == "__main__":
     cnt = 0
-    port = Serial(('192.168.1.166', 9876), '/dev/ttyUSB0', 115200)
+    port = Serial('192.168.1.166', '/dev/ttyUSB0', 115200)
     while True:
-        port.write("{0:d}".format(cnt))
+        port.write("{0:d}".format(cnt).encode("utf-8"))
         cnt += 1
-        time.sleep(0.3)
+        time.sleep(0.1)
 

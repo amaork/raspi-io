@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 from .client import RaspiWsClient
+from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['SerialInit', 'SerialClose', 'SerialRead', 'SerialWrite', 'SerialFlush', 'Serial']
 
@@ -51,10 +52,10 @@ class SerialFlush(RaspiBaseMsg):
 class Serial(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, address, port, baudrate, bytesize=8, parity='N', stopbits=1, timeout=1, verbose=1):
+    def __init__(self, host, port, baudrate, bytesize=8, parity='N', stopbits=1, timeout=1, verbose=1):
         """Raspi Ws Serial
 
-        :param address: raspi io server address
+        :param host: raspi io server address
         :param port: serial port name, such as /dev/ttyUSB0
         :param baudrate: serial port baudrate
         :param bytesize: serial port bytesize
@@ -62,7 +63,7 @@ class Serial(RaspiWsClient):
         :param stopbits:serial port stopbits
         :param timeout: serial port read timeout
         """
-        super(Serial, self).__init__(address, timeout * 2, verbose)
+        super(Serial, self).__init__((host, get_server_port(host, self.PATH, port)), timeout * 2, verbose)
         self.__port = port
         self.__opened = False
         ret = self._transfer(SerialInit(

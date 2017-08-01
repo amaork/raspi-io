@@ -5,7 +5,7 @@ from raspi_io import I2C
 
 
 if __name__ == '__main__':
-    i2c = I2C(('192.168.1.166', 9876), '/dev/i2c-1', 0x56)
+    i2c = I2C('192.168.1.166', '/dev/i2c-1', 0x56)
     # Python 3+ version can using bytes
     buf = ctypes.create_string_buffer(256)
     for i in range(256):
