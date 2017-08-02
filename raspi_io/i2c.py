@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import base64
 from .client import RaspiWsClient
 from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
@@ -91,7 +90,7 @@ class I2C(RaspiWsClient):
         :return: success return read data(bytes) else ""
         """
         ret = self._transfer(I2CRead(addr=address, size=size))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self._decode(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def write(self, address, data):
         """Write data to specific address
@@ -100,7 +99,7 @@ class I2C(RaspiWsClient):
         :param data: data to write(Python2,3 both can using ctypes, python3 using bytes)
         :return: success return write data size else -1
         """
-        ret = self._transfer(I2CWrite(addr=address, data=str(base64.b64encode(data))))
+        ret = self._transfer(I2CWrite(addr=address, data=self._encode(data)))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1
 
     def ioctl_read(self, address, size):
@@ -111,7 +110,7 @@ class I2C(RaspiWsClient):
         :return: success return read data size else -1
         """
         ret = self._transfer(I2CRead(addr=address, size=size, type=I2CRead.IOCTL))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self._decode(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def ioctl_write(self, address, data):
         """Using ioctl write data to specific address
@@ -120,5 +119,5 @@ class I2C(RaspiWsClient):
         :param data: data to write
         :return: success return write data size else -1
         """
-        ret = self._transfer(I2CWrite(addr=address, data=str(base64.b64encode(data)), type=I2CWrite.IOCTL))
+        ret = self._transfer(I2CWrite(addr=address, data=self._encode(data), type=I2CWrite.IOCTL))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1

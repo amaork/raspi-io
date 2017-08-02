@@ -90,7 +90,7 @@ class Serial(RaspiWsClient):
         :return: result, data or error
         """
         ret = self._transfer(SerialRead(size=size))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self._decode(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def write(self, data):
         """Write data to serial port
@@ -98,7 +98,7 @@ class Serial(RaspiWsClient):
         :param data: write data
         :return: result, error or write length
         """
-        ret = self._transfer(SerialWrite(data=str(base64.b64encode(data))))
+        ret = self._transfer(SerialWrite(data=self._encode(data)))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1
 
     def flush(self):

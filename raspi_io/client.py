@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import base64
 import websocket
 from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError
 __all__ = ['RaspiWsClient']
@@ -21,6 +22,24 @@ class RaspiWsClient(object):
     def _output(self, msg):
         if self.__verbose >= 2:
             print(msg)
+
+    @staticmethod
+    def _encode(data):
+        """Encode data to send binary data
+
+        :param data: data to encode
+        :return: after encode data
+        """
+        return str(base64.b64encode(data))
+
+    @staticmethod
+    def _decode(data):
+        """Decode received binary data
+
+        :param data: data to decode
+        :return: after decode data
+        """
+        return base64.b64decode(data[2:-1])
 
     def get_error(self):
         error = self.__error

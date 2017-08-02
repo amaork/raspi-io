@@ -5,6 +5,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
 ## Features
 
 - Support Python 2.7+, Python3+
+- Support SPI, API same as [Spidev](https://github.com/doceme/py-spidev)
 - Support I2C, API same as [pylibi2c](https://github.com/amaork/libi2c)
 - Support GPIO、Software PWM, API same as [RPi.GPIO](https://sourceforge.net/projects/raspberry-gpio-python/)
 - Support query raspi hardware information, such as: Serial No.、MAC address, device list etc
@@ -13,7 +14,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
 
 1. First install [raspi-ios](https://github.com/amaork/raspi-ios) on your raspberry pi, and create an `RaspiIOServer` instance
 
-2. Second install `raspi-io` on your computer, `sudo python setup.py install`
+2. Second install `raspi-io` on your computer, `sudo python setup.py install` or `sudo pip install git+https://github.com/amaork/raspi-io.git`
 
 ## Default port
 
@@ -34,6 +35,8 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
     Serial: support read/write/close/flushInput/flushOutput
 
     I2C: support open/read/write/ioctl_read/ioctl_write
+
+    SPI: support open/close/read/write/xfer/xfer2
 
 ## I2C Usage
 
@@ -56,6 +59,19 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
 
     # Read from i2c, Python2 return str, Python3 return bytes
     r_buf = i2c.read(0x0, 256)
+
+## SPI Usage
+
+    from raspi_io import SPI, Query
+
+    address = "192.168.1.166"
+    query = Query(address)
+    spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
+
+    # Probe SPI Flash JEDEC ID
+    data = spi.xfer([0x9f], 3)
+    print(list(data))
+
 
 ## GPIO Usage
 
