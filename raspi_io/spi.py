@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-import six
-import base64
 from .client import RaspiWsClient
 from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
@@ -94,7 +91,7 @@ class SPI(RaspiWsClient):
         :return: data
         """
         ret = self._transfer(SPIRead(size=size))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def write(self, data):
         """Write data to spi
@@ -102,9 +99,7 @@ class SPI(RaspiWsClient):
         :param data: data to write
         :return: write data size
         """
-        assert isinstance(data, list), "Write data must be list type"
-        data = bytes(data) if sys.version_info.major >= 3 else "".join(map(six.int2byte, data))
-        ret = self._transfer(SPIWrite(data=str(base64.b64encode(data))))
+        ret = self._transfer(SPIWrite(data=self.encode_binary(data)))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1
 
     def xfer(self, write_data, read_size, speed=0, delay=0):
@@ -116,11 +111,9 @@ class SPI(RaspiWsClient):
         :param delay: specifies the delay in usec between blocks.
         :return: read data
         """
-        assert isinstance(write_data, list), "Write data must be list type"
-        write_data = bytes(write_data) if sys.version_info.major >= 3 else "".join(map(six.int2byte, write_data))
-        ret = self._transfer(SPIXfer(write_data=str(base64.b64encode(write_data)),
+        ret = self._transfer(SPIXfer(write_data=self.encode_binary(write_data),
                              read_size=read_size, speed=speed, delay=delay))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def xfer2(self, write_data, read_size, speed=0, delay=0):
         """Performs an SPI transaction. Chip-select should be held active between blocks.
@@ -131,8 +124,6 @@ class SPI(RaspiWsClient):
         :param delay: specifies the delay in usec between blocks.
         :return: read data
         """
-        assert isinstance(write_data, list), "Write data must be list type"
-        write_data = bytes(write_data) if sys.version_info.major >= 3 else "".join(map(six.int2byte, write_data))
-        ret = self._transfer(SPIXfer2(write_data=str(base64.b64encode(write_data)),
+        ret = self._transfer(SPIXfer2(write_data=self.encode_binary(write_data),
                                       read_size=read_size, speed=speed, delay=delay))
-        return base64.b64decode(ret.data[2:-1]) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""

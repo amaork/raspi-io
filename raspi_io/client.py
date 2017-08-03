@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+import sys
 import json
 import base64
 import websocket
@@ -24,22 +26,44 @@ class RaspiWsClient(object):
             print(msg)
 
     @staticmethod
-    def _encode(data):
+    def encode_binary(data):
         """Encode data to send binary data
 
         :param data: data to encode
         :return: after encode data
         """
-        return str(base64.b64encode(data))
+        try:
+            return str(base64.b64encode(data))
+        except TypeError:
+            return str(base64.b64encode(bytes(data) if sys.version_info.major >= 3 else "".join(map(chr, data))))
 
     @staticmethod
-    def _decode(data):
+    def decode_binary(data):
         """Decode received binary data
 
         :param data: data to decode
-        :return: after decode data
+        :return: after decode data for python2 is str, python3 is bytes
         """
         return base64.b64decode(data[2:-1])
+
+    @staticmethod
+    def print_binary(data, base=10):
+        process = int if sys.version_info.major >= 3 else ord
+        if base == 10:
+            fmt = "{0:d}"
+        elif base == 16:
+            fmt = "0x{0:02x}"
+        elif base == 8:
+            fmt = "O{0:03o}"
+        elif base == 2:
+            fmt = "0b{0:08b}"
+        else:
+            fmt = "{}"
+
+        print("[", end="")
+        for i in data:
+            print(fmt.format(process(i)), end=", ")
+        print("\b\b]")
 
     def get_error(self):
         error = self.__error

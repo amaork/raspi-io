@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import base64
 from .client import RaspiWsClient
 from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
@@ -90,7 +89,7 @@ class Serial(RaspiWsClient):
         :return: result, data or error
         """
         ret = self._transfer(SerialRead(size=size))
-        return self._decode(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
 
     def write(self, data):
         """Write data to serial port
@@ -98,7 +97,7 @@ class Serial(RaspiWsClient):
         :param data: write data
         :return: result, error or write length
         """
-        ret = self._transfer(SerialWrite(data=self._encode(data)))
+        ret = self._transfer(SerialWrite(data=self.encode_binary(data)))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1
 
     def flush(self):

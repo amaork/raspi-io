@@ -70,7 +70,7 @@ Using websocket remote control your raspberry pi, raspberry pi needs create an  
 
     # Probe SPI Flash JEDEC ID
     data = spi.xfer([0x9f], 3)
-    print(list(data))
+    spi.print_binary(data)
 
 
 ## GPIO Usage

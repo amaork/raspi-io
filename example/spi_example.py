@@ -7,4 +7,4 @@ if __name__ == "__main__":
     query = Query(address)
     spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
     data = spi.xfer([0x9f], 3)
-    print(list(data), map(six.byte2int, data))
+    spi.print_binary(data)
