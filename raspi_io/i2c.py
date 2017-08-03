@@ -56,7 +56,7 @@ class I2CDevice(RaspiBaseMsg):
 class I2C(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, host, bus, device_address, tenbit=0, flags=0, delay=5, iaddr_bytes=1, timeout=1):
+    def __init__(self, host, bus, device_address, tenbit=0, flags=0, delay=5, iaddr_bytes=1, timeout=1, verbose=1):
         """Init a i2c instance
 
         :param host: raspi-io server address
@@ -67,8 +67,9 @@ class I2C(RaspiWsClient):
         :param delay: i2c internal operate delay, unit millisecond
         :param iaddr_bytes: i2c internal address bytes
         :param timeout: raspi-io timeout unit second
+        :param verbose: verbose message output
         """
-        super(I2C, self).__init__((host, get_server_port(host, self.PATH, bus)), timeout)
+        super(I2C, self).__init__((host, get_server_port(host, self.PATH, bus)), timeout, verbose)
         self.__opened = False
         self.__device = I2CDevice(
             bus=bus, addr=device_address, tenbit=tenbit, flags=flags, delay=delay, iaddr_bytes=iaddr_bytes

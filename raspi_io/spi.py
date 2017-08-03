@@ -56,7 +56,7 @@ class SPI(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
     def __init__(self, host, device, max_speed=50,
-                 mode=0, cshigh=False, no_cs=False, loop=False, lsbfirst=False, threewire=False, timeout=1):
+                 mode=0, cshigh=False, no_cs=False, loop=False, lsbfirst=False, threewire=False, timeout=1, verbose=1):
         """
 
         :param host: raspi-io server address
@@ -69,8 +69,9 @@ class SPI(RaspiWsClient):
         :param lsbfirst: LSB first
         :param threewire: SI/SO signals shared
         :param timeout: raspi-io timeout unit second
+        :param verbose: verbose message output
         """
-        super(SPI, self).__init__((host, get_server_port(host, self.PATH, device)), timeout)
+        super(SPI, self).__init__((host, get_server_port(host, self.PATH, device)), timeout, verbose)
         self.__opened = False
         self.__device = device
         ret = self._transfer(SPIOpen(device=device, max_speed=max_speed, mode=mode, cshigh=cshigh,
