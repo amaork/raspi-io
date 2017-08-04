@@ -3,8 +3,9 @@ from __future__ import print_function
 import sys
 import json
 import base64
+import socket
 import websocket
-from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError
+from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketTError
 __all__ = ['RaspiWsClient']
 
 
@@ -12,9 +13,13 @@ class RaspiWsClient(object):
     PATH = ""
 
     def __init__(self, address, timeout=1, verbose=1):
-        self.__error = ""
-        self.__verbose = verbose
-        self.__ws = websocket.create_connection(get_websocket_url(address, self.PATH), timeout)
+        try:
+
+            self.__error = ""
+            self.__verbose = verbose
+            self.__ws = websocket.create_connection(get_websocket_url(address, self.PATH), timeout)
+        except socket.error as err:
+            raise RaspiSocketTError(err)
 
     def _error(self, msg):
         self.__error = msg

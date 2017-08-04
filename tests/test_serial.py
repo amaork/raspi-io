@@ -15,7 +15,7 @@ class TestSerial(unittest.TestCase):
 
     def test_open(self):
         for port in self.serial_list:
-            self.assertEqual(port.is_open(), True)
+            self.assertEqual(port.is_open, True)
 
     def test_read(self):
         for port in self.serial_list:
