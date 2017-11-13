@@ -1,6 +1,6 @@
 Raspi-io
 ========
-Using websocket remote control your raspberry pi, raspberry pi needs create an  [RaspiIOServer](https://github.com/amaork/raspi-ios "RaspiIOServer") instance.
+Using websocket control your raspberry pi, raspberry pi side needs running an  [RaspiIOServer](https://github.com/amaork/raspi-ios "RaspiIOServer") instance.
 
 ## Features
 

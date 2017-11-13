@@ -34,7 +34,6 @@ class TestGPIO(unittest.TestCase):
         self.assertEqual(self.gpio.setup(21, GPIO.OUT), True)
         self.assertEqual(self.gpio.output(21, 1), True)
         self.assertEqual(self.gpio.output(21, 0), True)
-        self.assertEqual(self.gpio.setup(22, GPIO.OUT, initial=1), False)
 
     def test_cleanup(self):
         self.assertEqual(self.gpio.cleanup(123), False)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import uuid
 from .client import RaspiWsClient
-from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode', 'GPIOCleanup',
            'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl']
@@ -110,11 +109,14 @@ class GPIO(RaspiWsClient):
     PUD_DOWN = GPIOSetup.PUD_DOWN
 
     def __init__(self, host, timeout=1, verbose=1):
-        super(GPIO, self).__init__((host, get_server_port(host, self.PATH, self.PATH)), timeout, verbose)
+        super(GPIO, self).__init__(host, self.PATH, timeout, verbose)
         self.__registered = set()
 
     def __del__(self):
-        self.cleanup(list(self.__registered))
+        try:
+            self.cleanup(list(self.__registered))
+        except AttributeError:
+            pass
 
     def setmode(self, mode):
         ret = self._transfer(GPIOMode(mode=mode))
@@ -153,15 +155,18 @@ class SoftPWM(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
     def __init__(self, host, mode, channel, frequency, timeout=1, verbose=1):
-        super(SoftPWM, self).__init__((host, get_server_port(host, self.PATH, self.PATH)), timeout, verbose)
+        super(SoftPWM, self).__init__(host, self.PATH, timeout, verbose)
         self.__state = False
         self.__channel = channel
         self._transfer(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))
         self.uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, '{0:d},{1:d},{2:d}'.format(mode, channel, frequency)))
 
     def __del__(self):
-        self.stop()
-        self._transfer(GPIOCleanup(channel=self.__channel))
+        try:
+            self.stop()
+            self._transfer(GPIOCleanup(channel=self.__channel))
+        except AttributeError:
+            pass
 
     def start(self, duty):
         ret = self._transfer(GPIOSoftPWMCtrl(uuid=self.uuid, duty=duty))

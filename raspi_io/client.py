@@ -5,21 +5,29 @@ import json
 import base64
 import socket
 import websocket
-from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketTError
+from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketError, DEFAULT_PORT
 __all__ = ['RaspiWsClient']
 
 
 class RaspiWsClient(object):
     PATH = ""
 
-    def __init__(self, address, timeout=1, verbose=1):
+    def __init__(self, host, node, timeout=1, verbose=1):
         try:
 
             self.__error = ""
             self.__verbose = verbose
-            self.__ws = websocket.create_connection(get_websocket_url(address, self.PATH), timeout)
+            # First using default port apply for a dynamic port
+            require_addr = (host, DEFAULT_PORT)
+            ack = json.loads(websocket.create_connection(get_websocket_url(require_addr, self.PATH, node)).recv())
+
+            # Second using first step acquired port connect server
+            dynamic_addr = (host, RaspiAckMsg(**ack).data)
+            self.__ws = websocket.create_connection(get_websocket_url(dynamic_addr, self.PATH, node), timeout)
         except socket.error as err:
-            raise RaspiSocketTError(err)
+            raise RaspiSocketError(err)
+        except (json.JSONDecodeError, TypeError):
+            raise RaspiSocketError("Require dynamic port error")
 
     def _error(self, msg):
         self.__error = msg

@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 from serial import SerialException
 from .client import RaspiWsClient
-from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['SerialInit', 'SerialClose', 'SerialRead', 'SerialWrite', 'SerialFlush', 'SerialBaudrate', 'Serial']
 
@@ -73,7 +72,7 @@ class Serial(RaspiWsClient):
         :param timeout: serial port read timeout
         """
         socket_timeout = timeout * 2 or 1
-        super(Serial, self).__init__((host, get_server_port(host, self.PATH, port)), socket_timeout, verbose)
+        super(Serial, self).__init__(host, port, socket_timeout, verbose)
         self.__port = port
         self.__opened = False
         self.__baudrate = baudrate
@@ -82,6 +81,12 @@ class Serial(RaspiWsClient):
         self.__opened = ret.ack if isinstance(ret, RaspiAckMsg) else False
         if not self.is_open:
             raise SerialException(ret.data)
+
+    def __del__(self):
+        try:
+            self.close()
+        except AttributeError:
+            pass
 
     @property
     def is_open(self):
@@ -93,7 +98,7 @@ class Serial(RaspiWsClient):
 
     @property
     def baudrate(self):
-        return self.baudrate
+        return self.__baudrate
 
     @baudrate.setter
     def baudrate(self, baudrate):

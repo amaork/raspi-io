@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
-from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['I2C', 'I2CDevice' 'I2CRead', 'I2CWrite']
 
@@ -57,7 +56,7 @@ class I2C(RaspiWsClient):
         :param timeout: raspi-io timeout unit second
         :param verbose: verbose message output
         """
-        super(I2C, self).__init__((host, get_server_port(host, self.PATH, bus)), timeout, verbose)
+        super(I2C, self).__init__(host, bus, timeout, verbose)
         ret = self._transfer(I2CDevice(bus=bus, addr=device_address,
                                        tenbit=tenbit, flags=flags, delay=delay,
                                        iaddr_bytes=iaddr_bytes, page_bytes=page_bytes))

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
-from .setting import get_server_port
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['SPIOpen', 'SPIClose', 'SPIRead', 'SPIWrite', 'SPIXfer', 'SPIXfer2', 'SPI']
 
@@ -71,7 +70,7 @@ class SPI(RaspiWsClient):
         :param timeout: raspi-io timeout unit second
         :param verbose: verbose message output
         """
-        super(SPI, self).__init__((host, get_server_port(host, self.PATH, device)), timeout, verbose)
+        super(SPI, self).__init__(host, device, timeout, verbose)
         self.__opened = False
         self.__device = device
         ret = self._transfer(SPIOpen(device=device, max_speed=max_speed, mode=mode, cshigh=cshigh,
@@ -82,8 +81,11 @@ class SPI(RaspiWsClient):
             raise RuntimeError(ret.data)
 
     def __del__(self):
-        if self.__opened:
-            self._transfer(SPIClose(device=self.__device))
+        try:
+            if self.__opened:
+                self._transfer(SPIClose(device=self.__device))
+        except AttributeError:
+            pass
 
     def read(self, size):
         """Read specify bytes data from spi
