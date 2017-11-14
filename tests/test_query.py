@@ -22,7 +22,6 @@ class TestQuery(unittest.TestCase):
     def test_query_interface(self):
         interfaces = self.query.get_iface_list()
         self.assertIsInstance(interfaces, list)
-        self.assertLessEqual(len(interfaces), 2)
         self.assertIn("eth0", interfaces)
 
     def test_query_interface_address(self):

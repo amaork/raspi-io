@@ -1,5 +1,3 @@
-import six
-import ctypes
 import unittest
 from raspi_io import Serial, Query
 
@@ -24,12 +22,8 @@ class TestSerial(unittest.TestCase):
 
     def test_write(self):
         str_data = "12345678"
-        bin_data = ctypes.create_string_buffer(8)
-        for i in range(8):
-            bin_data[i] = six.int2byte(i)
         for port in self.serial_list:
             self.assertEqual(port.write(str_data.encode('utf-8')), len(str_data))
-            self.assertEqual(port.write(bin_data), len(bin_data))
 
 
 if __name__ == "__main__":

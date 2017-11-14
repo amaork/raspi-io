@@ -4,4 +4,5 @@ from .query import Query
 from .i2c import I2C
 from .spi import SPI
 from .core import RaspiSocketError
-__all__ = ['GPIO', 'SoftPWM', 'Serial', 'Query', 'I2C', 'SPI', 'RaspiSocketError']
+from .client import RaspberryManager
+__all__ = ['RaspberryManager', 'GPIO', 'SoftPWM', 'Serial', 'Query', 'I2C', 'SPI', 'RaspiSocketError']

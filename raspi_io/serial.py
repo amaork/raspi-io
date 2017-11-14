@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from serial import SerialException
+from serial.serialutil import to_bytes
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['SerialInit', 'SerialClose', 'SerialRead', 'SerialWrite', 'SerialFlush', 'SerialBaudrate', 'Serial']
@@ -128,6 +129,7 @@ class Serial(RaspiWsClient):
         :param data: write data
         :return: result, error or write length
         """
+        data = to_bytes(data)
         ret = self._transfer(SerialWrite(data=self.encode_binary(data)))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else -1
 

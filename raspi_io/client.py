@@ -123,3 +123,18 @@ class RaspiWsClient(object):
         except websocket.WebSocketException as err:
             self._error("{}".format(err))
             return None
+
+
+class RaspberryManager(object):
+    def __init__(self, host):
+        """Raspberry io manager
+
+        :param host: raspberry pi host
+        """
+        self.__host = host
+
+    def create(self, cls, *args, **kwargs):
+        if not issubclass(cls, RaspiWsClient):
+            raise TypeError("cls need a {!r}, not {!r}".format(RaspiWsClient.__class__, cls.__class__))
+
+        return cls(self.__host, *args, **kwargs)

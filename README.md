@@ -14,18 +14,32 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
 
 1. First install [raspi-ios](https://github.com/amaork/raspi-ios) on your raspberry pi, and create an `RaspiIOServer` instance
 
-2. Second install `raspi-io` on your computer, `sudo python setup.py install` or `sudo pip install git+https://github.com/amaork/raspi-io.git`
+2. Second install `raspi-io` on your computer
+
+    ```bash
+
+    $ git clone https://github.com/amaork/raspi-io.git
+    $ cd raspi-io
+    $ sudo python setup.py install
+    ```
+
+    or 
+
+    ```bash
+
+    $  sudo pip install git+https://github.com/amaork/raspi-io.git
+    ```
 
 ## Default port
 
 `raspi_io` default using port **`9876`** communicate with [RaspiIOServer](https://github.com/amaork/raspi-ios "RaspiIOServer"), but if `RaspiIOServer` port changed, your can specify default port like this:
 
-    import raspi_io
-    raspi_io.core.DEFAULT_PORT = xxxx
-
+```python
+import raspi_io
+raspi_io.core.DEFAULT_PORT = 39876
+```
 
 ## Interface
-
     Query: query raspi info
 
     GPIO: usage same as RPi.GPIO
@@ -37,114 +51,141 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
     I2C: support open/read/write/ioctl_read/ioctl_write
 
     SPI: support open/close/read/write/xfer/xfer2
+    
+    RaspberryManager: create RaspiWsClient instance
+    
+## RaspberryManager
+```python
+from raspi_io import *
+manager = RaspberryManager("192.168.1.166")
 
+# Create Query instance
+query = manager.create(Query)
+
+# Create I2C instance
+i2c = manager.create(I2C, "/dev/i2c-1", 0x56)
+
+# Create serial instance
+s = manager.create(Serial, port="/dev/ttyUSB0", baudrate=115200)
+
+```
+   
 ## I2C Usage
+```python
+import ctypes
+from raspi_io import I2C
 
-    import ctypes
-    from raspi_io import I2C
+# Open /dev/i2c-1, you can using Query.get_i2c_list() get i2c bus list
+i2c = I2C('192.168.1.166', '/dev/i2c-1', 0x56)
 
-    # Open /dev/i2c-1, you can using Query.get_i2c_list() get i2c bus list
-    i2c = I2C('192.168.1.166', '/dev/i2c-1', 0x56)
+# Python2, 3, both can using ctypes.create_string_buffer() create a buffer
+buf = ctypes.create_string_buffer(256)
 
-    # Python2, 3, both can using ctypes.create_string_buffer() create a buffer
-    buf = ctypes.create_string_buffer(256)
+# Python3 can using bytes, create a buffer
+buf = bytes(256)
 
-    # Python3 can using bytes, create a buffer
-    buf = bytes(256)
+# Write
+if i2c.write(0x0, buf) != len(buf):
+    # Error process
+    pass
 
-    # Write
-    if i2c.write(0x0, buf) != len(buf):
-        # Error process
-        pass
-
-    # Read from i2c, Python2 return str, Python3 return bytes
-    r_buf = i2c.read(0x0, 256)
+# Read from i2c, Python2 return str, Python3 return bytes
+r_buf = i2c.read(0x0, 256)
+```
 
 ## SPI Usage
+```python
+from raspi_io import SPI, Query
 
-    from raspi_io import SPI, Query
+address = "192.168.1.166"
+query = Query(address)
+spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
 
-    address = "192.168.1.166"
-    query = Query(address)
-    spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
-
-    # Probe SPI Flash JEDEC ID
-    data = spi.xfer([0x9f], 3)
-    spi.print_binary(data)
+# Probe SPI Flash JEDEC ID
+data = spi.xfer([0x9f], 3)
+spi.print_binary(data)
+```
 
 
 ## GPIO Usage
+```python
+from raspi_io import GPIO
 
-    from raspi_io import GPIO
+# Create a gpio instance
+gpio = GPIO('192.168.1.166')
 
-    # Create a gpio instance
-    gpio = GPIO('192.168.1.166')
+# Set as BCM mode
+gpio.setmode(GPIO.BCM)
 
-    # Set as BCM mode
-    gpio.setmode(GPIO.BCM)
+# Setup pin 21 as output, 20 as input
+gpio.setup(21, GPIO.OUT)
+gpio.setup(20, GPIO.IN)
 
-    # Setup pin 21 as output, 20 as input
-    gpio.setup(21, GPIO.OUT)
-    gpio.setup(20, GPIO.IN)
+# Output control
+gpio.output(21, 1)
+gpio.output(21, 0)
 
-    # Output control
-    gpio.output(21, 1)
-    gpio.output(21, 0)
-
-    # Get input
-    print(gpio.input(20))
+# Get input
+print(gpio.input(20))
+```
 
 ## SoftPWM usage
+```python
+from raspi_io import GPIO, SoftPWM
 
-    from raspi_io import GPIO, SoftPWM
+# Create a software pwm instance, BCM mode, pin21, 1000hz
+pwm = SoftPWM('192.168.1.166', GPIO.BCM, 21, 1000)
 
-    # Create a software pwm instance, BCM mode, pin21, 1000hz
-    pwm = SoftPWM('192.168.1.166', GPIO.BCM, 21, 1000)
+# Start pwm duty
+pwm.start(80)
 
-    # Start pwm duty
-    pwm.start(80)
-
-    # Stop
-    pwm.stop()
+# Stop
+pwm.stop()
+```
 
 ## Serial usage
+```python
+from raspi_io import Serial
 
-    from raspi_io import Serial
+# Open a serial port /dev/ttyUSB0, 115200 baudrate
+port = Serial('192.168.1.166', '/dev/ttyUSB0', 115200)
 
-    # Open a serial port /dev/ttyUSB0, 115200 baudrate
-    port = Serial('192.168.1.166', '/dev/ttyUSB0', 115200)
+# Read
+data = port.read(1024)
+if not data:
+    print("Read error:{}".format(port.get_error()))
 
-    # Read
-    ret, data = port.read(1024)
-    if not ret:
-        print("Read error:{}".format(data))
+# Write
+data = "1234567"
+# Python3+ need encode first
+w_size = port.write("1234567".encode("utf-8"))
+if w_size != len(data):
+    print("Write error:{}".format(port.get_error()))
+else:
+    print("Success write:{} bytes".format(w_size))
 
-    # Write
-    ret, data = port.write("1234567")
-    if not ret:
-        print("Write error:{}".format(data))
-    else:
-        print("Success write:{} bytes".format(data))
-
-    # Close
-    port.close()
+# Close
+port.close()
+```
 
 ## Query usage
+```python
+from raspi_io import Query
 
-    from raspi_io import Query
+# Create a query instance
+q = Query("192.168,1,166")
 
-    # Create a query instance
-    q = Query("192.168,1,166")
+# Get hardware information
+info = q.get_hardware_info()
 
-    # Get hardware information
-    info = q.get_hardware_info()
+# Error process
+if not info:
+    pass
 
-    # Error process
-    if not info:
-        pass
+hardware, revision, sn = info
 
-    hardware, revision, sn = info
+# Get serial port list
+l = q.get_serial_list()
+```
 
-    # Get seril port list
-    l = q.get_serial_list()
 

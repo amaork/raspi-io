@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-__all__ = ['get_websocket_url', 'RaspiBaseMsg', 'RaspiAckMsg',
+__all__ = ['get_websocket_url',
+           'RaspiBaseMsg', 'RaspiAckMsg',
            'RaspiMsgDecodeError', 'RaspiSocketError', 'DEFAULT_PORT']
 DEFAULT_PORT = 9876
 
