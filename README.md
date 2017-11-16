@@ -8,6 +8,7 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
 - Support SPI, API same as [Spidev](https://github.com/doceme/py-spidev)
 - Support I2C, API same as [pylibi2c](https://github.com/amaork/libi2c)
 - Support GPIO、Software PWM, API same as [RPi.GPIO](https://sourceforge.net/projects/raspberry-gpio-python/)
+- Support HDMI video settings, power on/off, get monitor support modes etc
 - Support query raspi hardware information, such as: Serial No.、MAC address, device list etc
 
 ## Installation
@@ -51,6 +52,8 @@ raspi_io.core.DEFAULT_PORT = 39876
     I2C: support open/read/write/ioctl_read/ioctl_write
 
     SPI: support open/close/read/write/xfer/xfer2
+    
+    TVService: raspberry pi video setting, set HDMI mode
     
     RaspberryManager: create RaspiWsClient instance
     
@@ -186,6 +189,27 @@ hardware, revision, sn = info
 
 # Get serial port list
 l = q.get_serial_list()
+```
+
+## TVService usage
+```python
+from raspi_io import TVService
+
+# Create a tv service object
+tv = TVService("192.168.1.166")
+
+# Get monitor preferred mode
+group, mode = tv.get_preferred_mode()
+
+# Get monitor supported modes
+for mode in tv.get_modes(group):
+    print(mode)
+    
+# Set monitor to 1920x1080p
+tv.set_explicit_mode(TVService.CEA, 16)
+
+# Power off hdmi output
+tv.power_control(False)
 ```
 
 

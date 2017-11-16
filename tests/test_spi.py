@@ -25,3 +25,7 @@ class SPITest(unittest.TestCase):
     def test_write(self):
         data = list(range(16))
         self.assertEqual(self.spi.write(data), len(data))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -6,7 +6,7 @@ import base64
 import socket
 import websocket
 from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketError, DEFAULT_PORT
-__all__ = ['RaspiWsClient']
+__all__ = ['RaspiWsClient', 'RaspberryManager']
 
 
 class RaspiWsClient(object):
