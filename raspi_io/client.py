@@ -26,7 +26,7 @@ class RaspiWsClient(object):
             self._ws = websocket.create_connection(get_websocket_url(dynamic_addr, self.PATH, node), timeout)
         except socket.error as err:
             raise RaspiSocketError(err)
-        except (json.JSONDecodeError, TypeError):
+        except (ValueError, TypeError):
             raise RaspiSocketError("Require dynamic port error")
 
     def _error(self, msg):
