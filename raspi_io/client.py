@@ -23,7 +23,7 @@ class RaspiWsClient(object):
 
             # Second using first step acquired port connect server
             dynamic_addr = (host, RaspiAckMsg(**ack).data)
-            self.__ws = websocket.create_connection(get_websocket_url(dynamic_addr, self.PATH, node), timeout)
+            self._ws = websocket.create_connection(get_websocket_url(dynamic_addr, self.PATH, node), timeout)
         except socket.error as err:
             raise RaspiSocketError(err)
         except (json.JSONDecodeError, TypeError):
@@ -60,7 +60,7 @@ class RaspiWsClient(object):
         return base64.b64decode(data[2:-1])
 
     @staticmethod
-    def print_binary(data, base=10):
+    def print_binary(data, base=16):
         process = int if sys.version_info.major >= 3 else ord
         if base == 10:
             fmt = "{0:d}"
@@ -98,11 +98,11 @@ class RaspiWsClient(object):
                 return None
 
             # Send msg
-            self.__ws.send(msg.dumps())
+            self._ws.send(msg.dumps())
             self._output("Send:{}".format(msg))
 
             # Wait ack
-            data = self.__ws.recv()
+            data = self._ws.recv()
             self._output("Recv:{}".format(data))
             if not data:
                 self._error("Receive ack error, no data returned")

@@ -8,27 +8,33 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
 - Support SPI, API same as [Spidev](https://github.com/doceme/py-spidev)
 - Support I2C, API same as [pylibi2c](https://github.com/amaork/libi2c)
 - Support GPIO、Software PWM, API same as [RPi.GPIO](https://sourceforge.net/projects/raspberry-gpio-python/)
-- Support HDMI video settings, power on/off, get monitor support modes etc
+- Support display image on LCD or HDMI via Multi-Media Abstraction Layer
+- Support HDMI video settings, power on/off, get monitor supported modes etc
 - Support query raspi hardware information, such as: Serial No.、MAC address, device list etc
 
 ## Installation
 
 1. First install [raspi-ios](https://github.com/amaork/raspi-ios) on your raspberry pi, and create an `RaspiIOServer` instance
 
-2. Second install `raspi-io` on your computer
+2. Second install Pillow
 
     ```bash
+    $ sudo apt-get install libjpeg-dev
+    $ sudo pip install Pillow
+    ```
 
+3. Finally install `raspi-io` on your computer
+
+    ```bash
     $ git clone https://github.com/amaork/raspi-io.git
     $ cd raspi-io
     $ sudo python setup.py install
     ```
-
+    
     or 
-
+    
     ```bash
-
-    $  sudo pip install git+https://github.com/amaork/raspi-io.git
+    $ sudo pip install git+https://github.com/amaork/raspi-io.git
     ```
 
 ## Default port
@@ -52,11 +58,13 @@ raspi_io.core.DEFAULT_PORT = 39876
     I2C: support open/read/write/ioctl_read/ioctl_write
 
     SPI: support open/close/read/write/xfer/xfer2
-    
+
+    MmalGraph: display image on LCD or HDMI
+
     TVService: raspberry pi video setting, set HDMI mode
-    
+
     RaspberryManager: create RaspiWsClient instance
-    
+
 ## RaspberryManager
 ```python
 from raspi_io import *
@@ -70,9 +78,8 @@ i2c = manager.create(I2C, "/dev/i2c-1", 0x56)
 
 # Create serial instance
 s = manager.create(Serial, port="/dev/ttyUSB0", baudrate=115200)
-
 ```
-   
+
 ## I2C Usage
 ```python
 import ctypes
@@ -89,11 +96,13 @@ buf = bytes(256)
 
 # Write
 if i2c.write(0x0, buf) != len(buf):
-    # Error process
-    pass
+    print(i2c.get_error())
 
 # Read from i2c, Python2 return str, Python3 return bytes
 r_buf = i2c.read(0x0, 256)
+
+# Print data
+i2c.print_binary(r_buf, 16)
 ```
 
 ## SPI Usage
@@ -106,7 +115,7 @@ spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
 
 # Probe SPI Flash JEDEC ID
 data = spi.xfer([0x9f], 3)
-spi.print_binary(data)
+spi.print_binary(data, 16)
 ```
 
 
@@ -189,6 +198,26 @@ hardware, revision, sn = info
 
 # Get serial port list
 l = q.get_serial_list()
+```
+
+## MmalGraph
+```python
+import time
+from raspi_io import TVService, MmalGraph
+
+# Create tv service object, make hdmi monitor worked on preferred mode
+tv = TVService("192.168.1.166")
+tv.set_preferred_mode()
+
+# Create a mmal graph object display on HDMI, enable reduce size
+graph = MmalGraph("192.168.1.166", display_num=MmalGraph.HDMI, reduce_size=True)
+
+# Display
+if not graph.open("../tests/superwoman.jpg"):
+    print(graph.get_error())
+ 
+# Wait a moment, just in case graph is close
+time.sleep(3)
 ```
 
 ## TVService usage
