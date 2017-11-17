@@ -17,10 +17,10 @@ if __name__ == "__main__":
             print(mode)
 
     # Set explicit mode, 1440x90
-    tv.set_explicit_mode(TVService.DMT, 47)
+    tv.set_explicit(TVService.DMT, 47)
 
     # Wait monitor respond
     time.sleep(3)
 
     # Set preferred mode
-    tv.set_preferred_mode()
+    tv.set_preferred()

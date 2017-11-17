@@ -8,7 +8,7 @@ if __name__ == '__main__':
     print("Display number:{}".format(graph.display_num))
 
     # Turn on
-    tv.set_preferred_mode()
+    tv.set_preferred()
     patterns = ("../tests/superwoman.jpg", "../tests/cross.png")
     for i in range(10):
         start = time.time()

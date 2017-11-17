@@ -44,11 +44,11 @@ class TestTVService(unittest.TestCase):
 
     def test_set_modes(self):
         with self.assertRaises(TypeError):
-            self.tv.set_explicit_mode()
+            self.tv.set_explicit()
 
-        self.assertEqual(self.tv.set_preferred_mode(), True)
-        self.assertEqual(self.tv.set_explicit_mode("123", 0), False)
-        self.assertEqual(self.tv.set_explicit_mode(TVService.DMT, 46), True)
+        self.assertEqual(self.tv.set_preferred(), True)
+        self.assertEqual(self.tv.set_explicit("123", 0), False)
+        self.assertEqual(self.tv.set_explicit(TVService.DMT, 46), True)
 
 
 if __name__ == "__main__":

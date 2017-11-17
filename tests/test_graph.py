@@ -28,7 +28,7 @@ class TestMmalGraph(unittest.TestCase):
             time.sleep(1)
 
     def test_hdmi(self):
-        self.tv.set_preferred_mode()
+        self.tv.set_preferred()
         time.sleep(3)
         graph = MmalGraph(self.host, MmalGraph.HDMI)
         self.assertEqual(graph.display_num, MmalGraph.HDMI)

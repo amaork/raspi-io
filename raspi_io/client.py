@@ -31,7 +31,7 @@ class RaspiWsClient(object):
 
     def _error(self, msg):
         self.__error = msg
-        if self.__verbose >= 1:
+        if self.__verbose >= 1 and msg:
             print(self.__error)
 
     def _output(self, msg):

@@ -78,7 +78,7 @@ class TVService(RaspiWsClient):
         ret = self._transfer(TVGetModes())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else None
 
-    def set_preferred_mode(self):
+    def set_preferred(self):
         """Power on HDMI with preferred settings
 
         :return:
@@ -86,7 +86,7 @@ class TVService(RaspiWsClient):
         ret = self._transfer(TVSetExplicit())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
-    def set_explicit_mode(self, group, mode):
+    def set_explicit(self, group, mode):
         """Power on HDMI with explicit group and mode
 
         :param group: group (DMT or CEA)
@@ -104,3 +104,6 @@ class TVService(RaspiWsClient):
         """
         ret = self._transfer(TVPower(power=power))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else None
+
+    def power_off(self):
+        return self.power_control(False)

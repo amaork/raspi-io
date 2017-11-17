@@ -222,6 +222,7 @@ time.sleep(3)
 
 ## TVService usage
 ```python
+import time
 from raspi_io import TVService
 
 # Create a tv service object
@@ -235,10 +236,13 @@ for mode in tv.get_modes(group):
     print(mode)
     
 # Set monitor to 1920x1080p
-tv.set_explicit_mode(TVService.CEA, 16)
+tv.set_explicit(TVService.CEA, 16)
+
+# Wait monitor response
+time.sleep(3)
 
 # Power off hdmi output
-tv.power_control(False)
+tv.power_off()
 ```
 
 
