@@ -19,7 +19,8 @@ class RaspiWsClient(object):
             self.__verbose = verbose
             # First using default port apply for a dynamic port
             require_addr = (host, DEFAULT_PORT)
-            ack = json.loads(websocket.create_connection(get_websocket_url(require_addr, self.PATH, node)).recv())
+            ws = websocket.create_connection(get_websocket_url(require_addr, self.PATH, node), timeout)
+            ack = json.loads(ws.recv())
 
             # Second using first step acquired port connect server
             dynamic_addr = (host, RaspiAckMsg(**ack).data)
