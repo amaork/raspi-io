@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.5
-
+import raspi_io.utility as utility
 from raspi_io import SoftPWM, GPIO
 
 
 if __name__ == '__main__':
-    address = '192.168.1.166'
+    address = utility.scan_server()[0]
     pwm20 = SoftPWM(address, GPIO.BCM, 20, 500)
     pwm21 = SoftPWM(address, GPIO.BCM, 21, 1000)
 

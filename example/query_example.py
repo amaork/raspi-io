@@ -1,8 +1,10 @@
 #!/usr/bin/env python3.5
 from raspi_io import Query
+import raspi_io.utility as utility
+
 
 if __name__ == "__main__":
-    q = Query("192.168.1.166")
+    q = Query(utility.scan_server()[0])
     print("Hardware info:{}".format(q.get_hardware_info()))
     for iface in q.get_iface_list():
         print("Ethernet interface:{}:{}".format(iface, q.get_ethernet_addr(iface)))

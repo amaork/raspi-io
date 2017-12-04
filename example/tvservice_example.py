@@ -1,9 +1,10 @@
 import time
 from raspi_io import TVService
+import raspi_io.utility as utility
 
 
 if __name__ == "__main__":
-    tv = TVService("192.168.1.166")
+    tv = TVService(utility.scan_server()[0])
 
     # Get status
     print(tv.get_status())

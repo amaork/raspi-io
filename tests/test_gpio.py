@@ -1,10 +1,11 @@
 import unittest
 from raspi_io import GPIO
+from raspi_io.utility import scan_server
 
 
 class TestGPIO(unittest.TestCase):
     def setUp(self):
-        self.gpio = GPIO('192.168.1.166', verbose=0)
+        self.gpio = GPIO(scan_server(timeout=0.03)[0], verbose=0)
 
     def tearDown(self):
         del self.gpio

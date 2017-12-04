@@ -68,7 +68,11 @@ raspi_io.core.DEFAULT_PORT = 39876
 ## RaspberryManager
 ```python
 from raspi_io import *
-manager = RaspberryManager("192.168.1.166")
+from raspi_io.utility import scan_server
+
+# Scan LAN raspi-io server
+servers = scan_server()
+manager = RaspberryManager(servers[0])
 
 # Create Query instance
 query = manager.create(Query)
@@ -84,9 +88,10 @@ s = manager.create(Serial, port="/dev/ttyUSB0", baudrate=115200)
 ```python
 import ctypes
 from raspi_io import I2C
+from raspi_io.utility import scan_server
 
 # Open /dev/i2c-1, you can using Query.get_i2c_list() get i2c bus list
-i2c = I2C('192.168.1.166', '/dev/i2c-1', 0x56)
+i2c = I2C(scan_server()[0], '/dev/i2c-1', 0x56)
 
 # Python2, 3, both can using ctypes.create_string_buffer() create a buffer
 buf = ctypes.create_string_buffer(256)
@@ -108,8 +113,9 @@ i2c.print_binary(r_buf, 16)
 ## SPI Usage
 ```python
 from raspi_io import SPI, Query
+from raspi_io.utility import scan_server
 
-address = "192.168.1.166"
+address = scan_server()[0]
 query = Query(address)
 spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
 
@@ -122,9 +128,10 @@ spi.print_binary(data, 16)
 ## GPIO Usage
 ```python
 from raspi_io import GPIO
+from raspi_io.utility import scan_server
 
 # Create a gpio instance
-gpio = GPIO('192.168.1.166')
+gpio = GPIO(scan_server()[0])
 
 # Set as BCM mode
 gpio.setmode(GPIO.BCM)
@@ -144,9 +151,10 @@ print(gpio.input(20))
 ## SoftPWM usage
 ```python
 from raspi_io import GPIO, SoftPWM
+from raspi_io.utility import scan_server
 
 # Create a software pwm instance, BCM mode, pin21, 1000hz
-pwm = SoftPWM('192.168.1.166', GPIO.BCM, 21, 1000)
+pwm = SoftPWM(scan_server()[0], GPIO.BCM, 21, 1000)
 
 # Start pwm duty
 pwm.start(80)
@@ -158,9 +166,10 @@ pwm.stop()
 ## Serial usage
 ```python
 from raspi_io import Serial
+from raspi_io.utility import scan_server
 
 # Open a serial port /dev/ttyUSB0, 115200 baudrate
-port = Serial('192.168.1.166', '/dev/ttyUSB0', 115200)
+port = Serial(scan_server()[0], '/dev/ttyUSB0', 115200)
 
 # Read
 data = port.read(1024)
@@ -183,9 +192,10 @@ port.close()
 ## Query usage
 ```python
 from raspi_io import Query
+from raspi_io.utility import scan_server
 
 # Create a query instance
-q = Query("192.168,1,166")
+q = Query(scan_server()[0])
 
 # Get hardware information
 info = q.get_hardware_info()
@@ -203,14 +213,15 @@ l = q.get_serial_list()
 ## MmalGraph
 ```python
 import time
+from raspi_io.utility import scan_server
 from raspi_io import TVService, MmalGraph
 
 # Create tv service object, make hdmi monitor worked on preferred mode
-tv = TVService("192.168.1.166")
-tv.set_preferred_mode()
+tv = TVService(scan_server()[0])
+tv.set_preferred()
 
 # Create a mmal graph object display on HDMI, enable reduce size
-graph = MmalGraph("192.168.1.166", display_num=MmalGraph.HDMI, reduce_size=True)
+graph = MmalGraph(scan_server()[0], display_num=MmalGraph.HDMI, reduce_size=True)
 
 # Display
 if not graph.open("../tests/superwoman.jpg"):
@@ -224,9 +235,10 @@ time.sleep(3)
 ```python
 import time
 from raspi_io import TVService
+from raspi_io.utility import scan_server
 
 # Create a tv service object
-tv = TVService("192.168.1.166")
+tv = TVService(scan_server()[0])
 
 # Get monitor preferred mode
 group, mode = tv.get_preferred_mode()

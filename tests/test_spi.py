@@ -1,10 +1,11 @@
 import unittest
 from raspi_io import Query, SPI
+from raspi_io.utility import scan_server
 
 
 class SPITest(unittest.TestCase):
     def setUp(self):
-        address = "192.168.1.166"
+        address = scan_server(timeout=0.03)[0]
         query = Query(address)
         self.spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
 

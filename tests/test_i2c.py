@@ -1,12 +1,13 @@
 import random
 import unittest
 from raspi_io import Query, I2C
+from raspi_io.utility import scan_server
 
 
 class I2CTest(unittest.TestCase):
     def setUp(self):
         self.i2c_size = 256
-        address = "192.168.1.166"
+        address = scan_server(timeout=0.03)[0]
 
         query = Query(address)
         devices = query.get_i2c_list()

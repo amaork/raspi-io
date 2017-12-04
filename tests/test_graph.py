@@ -2,12 +2,13 @@
 import os
 import time
 import unittest
+from raspi_io.utility import scan_server
 from raspi_io import TVService, MmalGraph
 
 
 class TestMmalGraph(unittest.TestCase):
     def setUp(self):
-        self.host = "192.168.1.166"
+        self.host = scan_server(timeout=0.03)[0]
         self.tv = TVService(self.host)
         self.images = [os.path.join(os.path.dirname(__file__),  f) for f in ("cross.png", "superwoman.jpg")]
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3.5
-
 from raspi_io import GPIO
+import raspi_io.utility as utility
 
 
 if __name__ == "__main__":
     io = [20, 21]
-    gpio = GPIO("192.168.1.166")
+    gpio = GPIO(utility.scan_server()[0])
 
     gpio.setmode(GPIO.BCM)
     gpio.setup(io, GPIO.OUT)

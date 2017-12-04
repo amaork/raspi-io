@@ -31,24 +31,24 @@ def get_host_address():
         return socket.gethostbyname(socket.gethostname())
 
 
-def connect_device(address, timeout=0.01):
-    try:
-        ws = websocket.create_connection("ws://{}:{}".format(address, DEFAULT_PORT), timeout=timeout)
-        ws.close()
-        return address
-    except socket.timeout:
-        return None
+def scan_server(timeout=0.01):
+    """Scan lan raspi_io server
 
-
-def scan_server():
-    """
-    Scan lan raspi_io server
-    :return:
+    :param timeout: scan timeout
+    :return: server address list
     """
     in_queue = Queue()
     out_queue = Queue()
 
-    def worker():
+    def connect_device(address):
+        try:
+            ws = websocket.create_connection("ws://{}:{}".format(address, DEFAULT_PORT), timeout=timeout)
+            ws.close()
+            return address
+        except (websocket.WebSocketTimeoutException, socket.timeout):
+            return None
+
+    def connect_worker():
         while not in_queue.empty():
             try:
                 out_queue.put(connect_device(in_queue.get()))
@@ -68,7 +68,8 @@ def scan_server():
         # Python 2 using thread + queue
         map(in_queue.put, all_host)
         for _ in range(multiprocessing.cpu_count() * 5):
-            th = Thread(target=worker)
+            th = Thread(target=connect_worker)
+            th.setDaemon(True)
             th.start()
 
         # Wait done

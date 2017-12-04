@@ -2,11 +2,12 @@
 import time
 import unittest
 from raspi_io import TVService
+from raspi_io.utility import scan_server
 
 
 class TestTVService(unittest.TestCase):
     def setUp(self):
-        self.tv = TVService("192.168.1.166")
+        self.tv = TVService(scan_server(timeout=0.03)[0])
 
     def test_power(self):
         self.tv.power_control(False)

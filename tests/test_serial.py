@@ -1,12 +1,14 @@
 import unittest
 from raspi_io import Serial, Query
+from raspi_io.utility import scan_server
 
 
 class TestSerial(unittest.TestCase):
     def setUp(self):
-        query = Query('192.168.1.166')
+        address = scan_server(timeout=0.03)[0]
+        query = Query(address)
         name_list = query.get_serial_list()
-        self.serial_list = [Serial('192.168.1.166', name, 115200, verbose=0) for name in name_list]
+        self.serial_list = [Serial(address, name, 115200, verbose=0) for name in name_list]
 
     def tearDown(self):
         del self.serial_list
