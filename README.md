@@ -2,6 +2,9 @@ Raspi-io
 ========
 Using websocket control your raspberry pi, raspberry pi side needs running an  [RaspiIOServer](https://github.com/amaork/raspi-ios "RaspiIOServer") instance.
 
+![chart](chart.png)
+
+
 ## Features
 
 - Support Python 2.7+, Python3+
@@ -30,9 +33,9 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
     $ cd raspi-io
     $ sudo python setup.py install
     ```
-    
+
     or 
-    
+
     ```bash
     $ sudo pip install git+https://github.com/amaork/raspi-io.git
     ```
