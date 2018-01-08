@@ -8,7 +8,7 @@ if __name__ == '__main__':
     server_addr = utility.scan_server()[0]
 
     tv = TVService(server_addr)
-    graph = MmalGraph(server_addr, MmalGraph.HDMI)
+    graph = MmalGraph(server_addr, MmalGraph.LCD)
     print("Display number:{}".format(graph.display_num))
 
     # Turn on

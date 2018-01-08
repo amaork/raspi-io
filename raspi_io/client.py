@@ -4,8 +4,10 @@ import sys
 import json
 import base64
 import socket
+import hashlib
 import websocket
-from .core import get_websocket_url, RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketError, DEFAULT_PORT
+from .core import RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketError, RaspiBinaryDataHeader, \
+    DEFAULT_PORT, DATA_TRANSFER_BLOCK_SIZE, get_websocket_url
 __all__ = ['RaspiWsClient', 'RaspberryManager']
 
 
@@ -95,8 +97,7 @@ class RaspiWsClient(object):
             self.__error = ""
 
             if not isinstance(msg, RaspiBaseMsg):
-                self._error("Msg type error:{0:s}".format(type(msg)))
-                return None
+                raise TypeError("request {!r} not {!r}".format(RaspiBaseMsg.__name__, msg.__class__.__name__))
 
             # Send msg
             self._ws.send(msg.dumps())
@@ -104,20 +105,141 @@ class RaspiWsClient(object):
 
             # Wait ack
             data = self._ws.recv()
-            self._output("Recv:{}".format(data))
             if not data:
-                self._error("Receive ack error, no data returned")
-                return None
+                raise RuntimeError("receive ack error, no data returned")
 
             dict_ = json.loads(data)
             ack = RaspiAckMsg(**dict_)
+            self._output("Recv:{}".format(data))
+
+            # Check ack message
+            if not ack.ack:
+                self._error("{}".format(ack.data))
+            return ack
+        except (RuntimeError, TypeError) as err:
+            self._error("{}".format(err))
+            return None
+        except RaspiMsgDecodeError as err:
+            self._error("{}".format(err))
+            return None
+        except websocket.WebSocketException as err:
+            self._error("{}".format(err))
+            return None
+
+    def _recv_binary_data(self, request):
+        """Receive binary data
+
+        1. send read request to server
+        2. recv binary data header
+        3. recv binary data
+        4. check size and md5
+        5. wait ack
+
+        :param request: read request
+        :return: binary data
+        """
+        try:
+
+            self._error("")
+            recv_data = bytearray()
+
+            if not isinstance(request, RaspiBaseMsg):
+                raise TypeError("request {!r} not {!r}".format(RaspiBaseMsg.__name__, request.__class__.__name__))
+
+            # First send read request
+            self._ws.send(request.dumps())
+            self._output("Send:{}".format(request))
+
+            # Second receive binary data header
+            data = self._ws.recv()
+            if not data:
+                raise RuntimeError("recv binary data header, no data returned")
+
+            dict_ = json.loads(data)
+            header = RaspiBinaryDataHeader(**dict_)
+            self._output("Recv:{}".format(data))
+
+            # Third recv binary data
+            for i in range(header.slices):
+                temp = self._ws.recv()
+                recv_data += temp
+
+            # Check data length and md5sum
+            if len(recv_data) != header.size:
+                raise ValueError("data size do not matched")
+
+            # Check data md5 checksum
+            if hashlib.md5(recv_data).hexdigest() != header.md5:
+                raise ValueError("data md5 checksum do not matched")
+
+            # Finally wait ack
+            data = self._ws.recv()
+            if not data:
+                raise RuntimeError("receive ack error, no data returned")
+
+            dict_ = json.loads(data)
+            ack = RaspiAckMsg(**dict_)
+            self._output("Recv:{}".format(data))
+
+            # Check ack message
+            if not ack.ack:
+                self._error("{}".format(ack.data))
+
+            # Return received data
+            return recv_data
+        except (ValueError, RuntimeError, TypeError) as err:
+            self._error("{}".format(err))
+            return None
+        except RaspiMsgDecodeError as err:
+            self._error("{}".format(err))
+            return None
+        except websocket.WebSocketException as err:
+            self._error("{}".format(err))
+            return None
+
+    def _send_binary_data(self, header, data):
+        """Send binary data to raspi io server
+
+        1. send binary data header to server
+        2. send binary data piece by piece
+        3. wait ack
+
+        :param header: binary data header
+        :param data: graph data
+        :return: success, return True
+        """
+        try:
+
+            self._error("")
+
+            if not isinstance(header, RaspiBinaryDataHeader):
+                raise TypeError("req {!r} not {!r}".format(RaspiBinaryDataHeader.__name__, header.__class__.__name__))
+
+            # First send binary data header
+            self._ws.send(header.dumps())
+            self._output("Send:{}".format(header))
+
+            # Second send binary data using binary mode
+            for i in range(header.slices):
+                self._ws.send_binary(data[i * DATA_TRANSFER_BLOCK_SIZE: (i + 1) * DATA_TRANSFER_BLOCK_SIZE])
+
+            # Wait ack
+            data = self._ws.recv()
+            if not data:
+                raise RuntimeError("receive ack error, no data returned")
+
+            dict_ = json.loads(data)
+            ack = RaspiAckMsg(**dict_)
+            self._output("Recv:{}".format(data))
 
             # Check ack message
             if not ack.ack:
                 self._error("{}".format(ack.data))
 
             return ack
-
+        except (TypeError, RuntimeError) as err:
+            self._error("{}".format(err))
+            return None
         except RaspiMsgDecodeError as err:
             self._error("{}".format(err))
             return None

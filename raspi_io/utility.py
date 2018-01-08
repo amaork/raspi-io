@@ -31,7 +31,7 @@ def get_host_address():
         return socket.gethostbyname(socket.gethostname())
 
 
-def scan_server(timeout=0.01):
+def scan_server(timeout=0.04):
     """Scan lan raspi_io server
 
     :param timeout: scan timeout

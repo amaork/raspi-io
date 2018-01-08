@@ -1,13 +1,37 @@
 # -*- coding: utf-8 -*-
 import json
-__all__ = ['get_websocket_url',
-           'RaspiBaseMsg', 'RaspiAckMsg',
-           'RaspiMsgDecodeError', 'RaspiSocketError', 'DEFAULT_PORT']
+import hashlib
+__all__ = ['get_websocket_url', 'get_binary_data_header',
+           'RaspiBaseMsg', 'RaspiAckMsg', 'RaspiBinaryDataHeader',
+           'RaspiMsgDecodeError', 'RaspiSocketError', 'DEFAULT_PORT', 'DATA_TRANSFER_BLOCK_SIZE']
 DEFAULT_PORT = 9876
+DATA_TRANSFER_BLOCK_SIZE = 512 * 1024
 
 
 def get_websocket_url(address, path, node):
     return "ws://{0:s}:{1:d}/{2:s}?{3:s}".format(address[0], address[1], path, node)
+
+
+def get_binary_data_header(data, fmt="bin", handle=""):
+    """Get binary data transfer info
+
+    :param data: binary data
+    :param fmt: data format
+    :param handle: which function process this data
+    :return: data size, data md5, data block slices
+    """
+    size = len(data)
+    block = DATA_TRANSFER_BLOCK_SIZE
+    md5 = hashlib.md5(data).hexdigest()
+
+    if size <= block:
+        slices = 1
+    elif size % block == 0:
+        slices = size // block
+    else:
+        slices = size // block + 1
+
+    return RaspiBinaryDataHeader(size=size, md5=md5, slices=slices, format=fmt, handle=handle)
 
 
 class RaspiMsgDecodeError(Exception):
@@ -72,3 +96,10 @@ class RaspiAckMsg(RaspiBaseMsg):
 
     def __init__(self, **kwargs):
         super(RaspiAckMsg, self).__init__(**kwargs)
+
+
+class RaspiBinaryDataHeader(RaspiBaseMsg):
+    _properties = {'size', 'md5', 'slices', 'format'}
+
+    def __init__(self, **kwargs):
+        super(RaspiBinaryDataHeader, self).__init__(**kwargs)

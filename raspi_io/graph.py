@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-import hashlib
-import websocket
 from PIL import Image
 from .client import RaspiWsClient
-from .core import RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError
-__all__ = ['MmalGraph', 'GraphInit', 'GraphClose', 'GraphHeader', 'GraphProperty']
+from .core import RaspiBaseMsg, RaspiAckMsg, get_binary_data_header
+__all__ = ['MmalGraph', 'GraphInit', 'GraphClose', 'GraphProperty']
 
 
 class GraphInit(RaspiBaseMsg):
@@ -24,14 +21,6 @@ class GraphClose(RaspiBaseMsg):
         super(GraphClose, self).__init__(**kwargs)
 
 
-class GraphHeader(RaspiBaseMsg):
-    _handle = 'open'
-    _properties = {'size', 'md5', 'slices', 'format'}
-
-    def __init__(self, **kwargs):
-        super(GraphHeader, self).__init__(**kwargs)
-
-
 class GraphProperty(RaspiBaseMsg):
     _handle = 'get_property'
     _properties = {'property'}
@@ -44,7 +33,6 @@ class GraphProperty(RaspiBaseMsg):
 class MmalGraph(RaspiWsClient):
     LCD = 4
     HDMI = 5
-    BLOCK_SIZE = 512 * 1024
     REDUCE_SIZE_FORMAT = ("BMP",)
     PATH = __name__.split(".")[-1]
 
@@ -85,15 +73,6 @@ class MmalGraph(RaspiWsClient):
         ret = self._transfer(GraphProperty(property=GraphProperty.DISPLAY_NUM))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else None
 
-    @staticmethod
-    def calc_slice_size(total, block):
-        if total <= block:
-            return 1
-        elif total % block == 0:
-            return total // block
-        else:
-            return total // block + 1
-
     def open(self, path, reduce_size=None):
         """Open an image display on raspberry pi via mmal video core
 
@@ -120,13 +99,8 @@ class MmalGraph(RaspiWsClient):
             with open(path, "rb") as fp:
                 data = fp.read()
 
-            # Get header info
-            size = len(data)
-            md5 = hashlib.md5(data).hexdigest()
-            slices = self.calc_slice_size(size, self.BLOCK_SIZE)
-
             # First transfer header info
-            ret = self.__transfer_graph(GraphHeader(size=size, md5=md5, format=fmt, slices=slices), data)
+            ret = self._send_binary_data(get_binary_data_header(data, fmt, "open"), data)
             if isinstance(ret, RaspiAckMsg) and ret.ack:
                 self.__uri = path
                 return ret.data
@@ -142,49 +116,3 @@ class MmalGraph(RaspiWsClient):
     def close(self):
         ret = self._transfer(GraphClose())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
-
-    def __transfer_graph(self, header, data):
-        """Transfer graph to raspberry
-
-        :param header: graph header
-        :param data: graph data
-        :return: success, return True
-        """
-        try:
-
-            self._error("")
-
-            if not isinstance(header, RaspiBaseMsg):
-                self._error("Msg type error, not:{!r}".format(header.__class__.__name__))
-                return None
-
-            # First send graph header
-            self._ws.send(header.dumps())
-            self._output("Send:{}".format(header))
-
-            # Second send graph data using binary mode
-            for i in range(header.slices):
-                self._ws.send_binary(data[i * self.BLOCK_SIZE: (i + 1) * self.BLOCK_SIZE])
-
-            # Wait ack
-            data = self._ws.recv()
-            self._output("Recv:{}".format(data))
-            if not data:
-                self._error("Receive ack error, no data returned")
-                return None
-
-            dict_ = json.loads(data)
-            ack = RaspiAckMsg(**dict_)
-
-            # Check ack message
-            if not ack.ack:
-                self._error("{}".format(ack.data))
-
-            return ack
-
-        except RaspiMsgDecodeError as err:
-            self._error("{}".format(err))
-            return None
-        except websocket.WebSocketException as err:
-            self._error("{}".format(err))
-            return None
