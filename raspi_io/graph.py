@@ -100,10 +100,9 @@ class MmalGraph(RaspiWsClient):
                 data = fp.read()
 
             # First transfer header info
-            ret = self._send_binary_data(get_binary_data_header(data, fmt, "open"), data)
-            if isinstance(ret, RaspiAckMsg) and ret.ack:
+            if self._send_binary_data(get_binary_data_header(data, fmt, "open"), data):
                 self.__uri = path
-                return ret.data
+                return True
             else:
                 return False
         except IOError as err:
