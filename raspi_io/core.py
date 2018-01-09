@@ -83,6 +83,10 @@ class RaspiBaseMsg(object):
             msg = "'{0}' object has no attribute '{1}'"
             raise AttributeError(msg.format(type(self).__name__, name))
 
+    @property
+    def dict(self):
+        return self.__dict__.copy()
+
     def dumps(self):
         """Encode data to a dict string
 

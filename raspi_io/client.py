@@ -131,7 +131,7 @@ class RaspiWsClient(object):
 
         1. send read request to server
         2. recv binary data header
-        3. recv binary data
+        3. recv binary data piece by piece
         4. check size and md5
         5. wait ack
 
@@ -236,7 +236,7 @@ class RaspiWsClient(object):
             if not ack.ack:
                 self._error("{}".format(ack.data))
 
-            return ack
+            return ack.ack
         except (TypeError, RuntimeError) as err:
             self._error("{}".format(err))
             return None

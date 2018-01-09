@@ -8,8 +8,8 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
 ## Features
 
 - Support Python 2.7+, Python3+
-- Support SPI, API same as [Spidev](https://github.com/doceme/py-spidev)
 - Support I2C, API same as [pylibi2c](https://github.com/amaork/libi2c)
+- Support SPI, API same as [Spidev](https://github.com/doceme/py-spidev) and support SPIFlash
 - Support GPIO、Software PWM, API same as [RPi.GPIO](https://sourceforge.net/projects/raspberry-gpio-python/)
 - Support display image on LCD or HDMI via Multi-Media Abstraction Layer
 - Support HDMI video settings, power on/off, get monitor supported modes etc
@@ -34,9 +34,10 @@ Using websocket control your raspberry pi, raspberry pi side needs running an  [
     $ sudo python setup.py install
     ```
 
-    or 
+    or
 
     ```bash
+    $ sudo apt-get install libjpeg-dev
     $ sudo pip install git+https://github.com/amaork/raspi-io.git
     ```
 
@@ -61,6 +62,8 @@ raspi_io.core.DEFAULT_PORT = 39876
     I2C: support open/read/write/ioctl_read/ioctl_write
 
     SPI: support open/close/read/write/xfer/xfer2
+
+    SPIFlash support probe/erase/read_chip/write_chip
 
     MmalGraph: display image on LCD or HDMI
 
@@ -115,16 +118,31 @@ i2c.print_binary(r_buf, 16)
 
 ## SPI Usage
 ```python
-from raspi_io import SPI, Query
 from raspi_io.utility import scan_server
+from raspi_io import SPI, Query, SPIFlash
+from raspi_io.spi_flash import SPIFlashInstruction
 
 address = scan_server()[0]
-query = Query(address)
-spi = SPI(address, query.get_spi_list()[-1], max_speed=8000)
+device = Query(address).get_spi_list()[-1]
+spi = SPI(address, device, max_speed=8000)
 
 # Probe SPI Flash JEDEC ID
 data = spi.xfer([0x9f], 3)
 spi.print_binary(data, 16)
+
+# Create a spi flash instance
+flash_instruction = SPIFlashInstruction(chip_erase=0x60)
+# When spi flash has different instruction set, can specified the flash instruction
+flash = SPIFlash(address, device, speed=8000, page_size=256, chip_size=1024*1024, instruction=flash_instruction)
+
+# Get spi flash manufacturer id and device id
+manufacturer_id, device_id = flash.probe()
+
+# Read whole chip
+data = flash.read_chip()
+
+# Write data to chip with verify
+flash.write_chip(data, verify=True)
 ```
 
 
@@ -229,7 +247,7 @@ graph = MmalGraph(scan_server()[0], display_num=MmalGraph.HDMI, reduce_size=True
 # Display
 if not graph.open("../tests/superwoman.jpg"):
     print(graph.get_error())
- 
+
 # Wait a moment, just in case graph is close
 time.sleep(3)
 ```
@@ -249,7 +267,7 @@ group, mode = tv.get_preferred_mode()
 # Get monitor supported modes
 for mode in tv.get_modes(group):
     print(mode)
-    
+
 # Set monitor to 1920x1080p
 tv.set_explicit(TVService.CEA, 16)
 
