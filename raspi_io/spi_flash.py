@@ -119,14 +119,18 @@ class SPIFlash(RaspiWsClient):
         """
         # First erase chip
         if not self.erase():
-            print("Erase chip error:{}".format(self.get_error()))
+            self._error("Erase chip error:{}".format(self.get_error()))
             return False
         # Second write data to chip
         if not self._send_binary_data(get_binary_data_header(data, handle="write_chip"), data):
-            print("Write chip error:{}".format(self.get_error()))
+            self._error("Write chip error:{}".format(self.get_error()))
             return False
 
         # Finally verify
-        return hashlib.md5(self.read_chip()).hexdigest() == hashlib.md5(data).hexdigest() if verify else True
+        if verify and hashlib.md5(self.read_chip()).hexdigest() != hashlib.md5(data).hexdigest():
+            self._error("Verify error, md5 do not matched")
+            return False
+
+        return True
 
 
