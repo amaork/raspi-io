@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket
 import websocket
-from queue import Queue
 from .core import DEFAULT_PORT
 
 try:
@@ -10,6 +9,10 @@ except ImportError:
     import multiprocessing
     from threading import Thread
 
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
 __all__ = ['get_host_address', 'scan_server']
 
 
