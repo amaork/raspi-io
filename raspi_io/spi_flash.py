@@ -24,9 +24,11 @@ class SPIFlashInstruction(RaspiBaseMsg):
 
 class SPIFlashDevice(RaspiBaseMsg):
     _handle = 'open'
-    _properties = {'device', 'speed', 'page_size', 'chip_size', 'instruction'}
+    _properties = {'device', 'speed', 'page_size', 'chip_size', 'instruction', 'cpol', 'cpha'}
 
     def __init__(self, **kwargs):
+        kwargs.setdefault('cpol', False)
+        kwargs.setdefault('cpha', False)
         kwargs.setdefault('instruction', SPIFlashInstruction())
         super(SPIFlashDevice, self).__init__(**kwargs)
 
@@ -62,7 +64,8 @@ class SPIFlashReadChip(RaspiBaseMsg):
 class SPIFlash(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, host, device, speed, page_size, chip_size, instruction=None, timeout=30, verbose=1):
+    def __init__(self, host, device, speed, page_size, chip_size,
+                 cpol=False, cpha=False, instruction=None, timeout=30, verbose=1):
         """
 
         :param host: raspi-io server address
@@ -70,13 +73,16 @@ class SPIFlash(RaspiWsClient):
         :param speed: spi bus speed
         :param page_size: spi flash page size (unit byte)
         :param chip_size: spi flash chip size (unit byte)
+        :param cpol: spi clock polarity , clk idle state (False clk idle --> Low, True clk idle --> High)
+        :param cpha: spi clock phase, strobe edge (False first edge, True second edge)
         :param instruction: spi flash instruction
         :param timeout: raspi-io timeout unit second
         :param verbose: verbose message output
         """
         super(SPIFlash, self).__init__(host, device, timeout, verbose)
         flash_instruction = instruction if isinstance(instruction, SPIFlashInstruction) else SPIFlashInstruction()
-        ret = self._transfer(SPIFlashDevice(device=device, speed=speed, page_size=page_size, chip_size=chip_size,
+        ret = self._transfer(SPIFlashDevice(device=device, speed=speed, cpol=cpol, cpha=cpha,
+                                            page_size=page_size, chip_size=chip_size,
                                             instruction=flash_instruction.dict))
         if not isinstance(ret, RaspiAckMsg) or not ret.ack:
             raise RuntimeError(ret.data)
