@@ -3,6 +3,7 @@ import uuid
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode', 'GPIOCleanup',
+           'SoftSPI', 'GPIOSoftSPI', 'GPIOSoftSPIXfer', 'GPIOSoftSPIRead', 'GPIOSoftSPIWrite',
            'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl']
 
 
@@ -92,6 +93,43 @@ class GPIOSoftPWMCtrl(RaspiBaseMsg):
         super(GPIOSoftPWMCtrl, self).__init__(**kwargs)
 
 
+class GPIOSoftSPI(RaspiBaseMsg):
+    _handle = 'spi_init'
+    _properties = {'mode', 'cs', 'clk', 'mosi', 'miso', 'bits_per_word'}
+
+    def __init__(self, **kwargs):
+        super(GPIOSoftSPI, self).__init__(**kwargs)
+
+    def generate_uuid(self):
+        return str(uuid.uuid5(uuid.NAMESPACE_OID, "SoftSPI:{0:d},{1:d},{2:d},{3:d},{4:d},{5:d}".format(
+            self.mode, self.cs, self.clk, self.mosi, self.miso, self.bits_per_word,
+        )))
+
+
+class GPIOSoftSPIXfer(RaspiBaseMsg):
+    _handle = 'spi_xfer'
+    _properties = {'data', 'size', 'uuid'}
+
+    def __init__(self, **kwargs):
+        super(GPIOSoftSPIXfer, self).__init__(**kwargs)
+
+
+class GPIOSoftSPIRead(RaspiBaseMsg):
+    _handle = 'spi_read'
+    _properties = {'size', 'uuid'}
+
+    def __init__(self, **kwargs):
+        super(GPIOSoftSPIRead, self).__init__(**kwargs)
+
+
+class GPIOSoftSPIWrite(RaspiBaseMsg):
+    _handle = 'spi_write'
+    _properties = {'data', 'uuid'}
+
+    def __init__(self, **kwargs):
+        super(GPIOSoftSPIWrite, self).__init__(**kwargs)
+
+
 class GPIO(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
@@ -159,6 +197,7 @@ class SoftPWM(RaspiWsClient):
         self.__state = False
         self.__channel = channel
         self._transfer(GPIOSoftPWM(mode=mode, channel=channel, frequency=frequency))
+        # TODO: Move to SoftPWM as a function
         self.uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, '{0:d},{1:d},{2:d}'.format(mode, channel, frequency)))
 
     def __del__(self):
@@ -180,3 +219,51 @@ class SoftPWM(RaspiWsClient):
 
     def is_running(self):
         return self.__state
+
+
+class SoftSPI(RaspiWsClient):
+    PATH = __name__.split(".")[-1]
+
+    def __init__(self, host, mode, cs, clk, mosi, miso, bits_per_word=8, timeout=1, verbose=1):
+        """Software spi controller, using gpio simulate
+
+        :param host: raspberry ip address
+        :param mode: gpio mode, BCM or BOARD
+        :param cs: spi chip select gpio pin
+        :param clk: spi clk gpio pin
+        :param mosi: spi mosi gpio pin
+        :param miso: spi miso gpio pin
+        :param bits_per_word: spi per word bits
+        :param timeout: timeout
+        :param verbose: verbose message output
+        :return:
+        """
+        super(SoftSPI, self).__init__(host, self.PATH, timeout, verbose)
+        spi = GPIOSoftSPI(mode=mode, cs=cs, clk=clk, mosi=mosi, miso=miso, bits_per_word=bits_per_word)
+        ret = self._transfer(spi)
+        if not isinstance(ret, RaspiAckMsg) or not ret.ack:
+            raise RuntimeError(ret.data)
+        self.channel = [cs, clk, mosi, miso]
+        self.uuid = spi.generate_uuid()
+
+    def __del__(self):
+        try:
+            self.close()
+        except AttributeError:
+            pass
+
+    def xfer(self, data, size=0):
+        ret = self._transfer(GPIOSoftSPIXfer(data=data, size=size, uuid=self.uuid))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else list()
+
+    def read(self, size):
+        ret = self._transfer(GPIOSoftSPIRead(size=size, uuid=self.uuid))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else list()
+
+    def write(self, data):
+        ret = self._transfer(GPIOSoftSPIWrite(data=data, uuid=self.uuid))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else 0
+
+    def close(self):
+        ret = self._transfer(GPIOCleanup(channel=self.channel))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False

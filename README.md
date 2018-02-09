@@ -57,6 +57,8 @@ raspi_io.core.DEFAULT_PORT = 39876
 
     SoftPWM: usage same as RPi.GPIO.PWM
 
+    SoftSPI: Software spi controller support read/write/xfer
+
     Serial: support read/write/close/flushInput/flushOutput
 
     I2C: support open/read/write/ioctl_read/ioctl_write
