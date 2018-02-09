@@ -65,6 +65,8 @@ raspi_io.core.DEFAULT_PORT = 39876
 
     SPIFlash support probe/erase/read_chip/write_chip
 
+    GPIOSPIFlash support probe/erase/read_chip/write_chip
+
     MmalGraph: display image on LCD or HDMI
 
     TVService: raspberry pi video setting, set HDMI mode

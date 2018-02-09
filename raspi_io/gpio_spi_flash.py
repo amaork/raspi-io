@@ -1,88 +1,44 @@
 # -*- coding: utf-8 -*-
+import uuid
 import hashlib
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg, get_binary_data_header
-__all__ = ['SPIFlashInstruction', 'SPIFlashDevice', 'SPIFlashClose',
-           'SPIFlashProbe', 'SPIFlashErase', 'SPIFlashReadChip', 'SPIFlash']
+from .spi_flash import SPIFlashInstruction, SPIFlashErase, SPIFlashClose, SPIFlashProbe, SPIFlashReadChip
 
 
-class SPIFlashInstruction(RaspiBaseMsg):
-    _properties = {'read_id', 'read_sr', 'chip_erase', 'page_read', 'page_write', 'write_enable', 'write_disable'}
-
-    def __init__(self, **kwargs):
-        # Read identification
-        kwargs.setdefault('read_id', 0x9f)
-        # Read status register
-        kwargs.setdefault('read_sr', 0x05)
-        kwargs.setdefault('chip_erase', 0x60)
-        kwargs.setdefault('page_read', 0x03)
-        kwargs.setdefault('page_write', 0x2)
-        kwargs.setdefault('write_enable', 0x6)
-        kwargs.setdefault('write_disable', 0x4)
-        super(SPIFlashInstruction, self).__init__(**kwargs)
-
-
-class SPIFlashDevice(RaspiBaseMsg):
+class GPIOSPIFlashDevice(RaspiBaseMsg):
     _handle = 'open'
-    _properties = {'device', 'speed', 'page_size', 'chip_size', 'instruction', 'cpol', 'cpha'}
+    _properties = {'clk', 'cs', 'mosi', 'miso', 'page_size', 'chip_size', 'instruction'}
 
     def __init__(self, **kwargs):
-        super(SPIFlashDevice, self).__init__(**kwargs)
+        super(GPIOSPIFlashDevice, self).__init__(**kwargs)
 
 
-class SPIFlashProbe(RaspiBaseMsg):
-    _handle = 'probe'
-
-    def __init__(self, **kwargs):
-        super(SPIFlashProbe, self).__init__(**kwargs)
-
-
-class SPIFlashErase(RaspiBaseMsg):
-    _handle = 'erase'
-
-    def __init__(self, **kwargs):
-        super(SPIFlashErase, self).__init__(**kwargs)
-
-
-class SPIFlashClose(RaspiBaseMsg):
-    _handle = 'close'
-
-    def __init__(self, **kwargs):
-        super(SPIFlashClose, self).__init__(**kwargs)
-
-
-class SPIFlashReadChip(RaspiBaseMsg):
-    _handle = 'read_chip'
-
-    def __init__(self, **kwargs):
-        super(SPIFlashReadChip, self).__init__(**kwargs)
-
-
-class SPIFlash(RaspiWsClient):
+class GPIOSPIFlash(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
-    def __init__(self, host, device, speed, page_size, chip_size,
-                 cpol=False, cpha=False, instruction=None, timeout=30, verbose=1):
+    def __init__(self, host, page_size, chip_size,
+                 cs=8, clk=11, mosi=10, miso=9, instruction=None, timeout=200, verbose=1):
         """
 
         :param host: raspi-io server address
         :param device: spi device name, such as /dev/spidev0.0
-        :param speed: spi bus speed
         :param page_size: spi flash page size (unit byte)
         :param chip_size: spi flash chip size (unit byte)
-        :param cpol: spi clock polarity , clk idle state (False clk idle --> Low, True clk idle --> High)
-        :param cpha: spi clock phase, strobe edge (False first edge, True second edge)
+        :param cs: spi chip select gpio pin
+        :param clk: spi clk gpio pin
+        :param mosi: spi mosi gpio pin
+        :param miso: spi miso gpio pin
         :param instruction: spi flash instruction
         :param timeout: raspi-io timeout unit second
         :param verbose: verbose message output
         """
-        cpol = True if cpol else False
-        cpha = True if cpha else False
-        super(SPIFlash, self).__init__(host, device, timeout, verbose)
+        device_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, '{}:{}:{}:{}'.format(cs, clk, mosi, miso)))
+        super(GPIOSPIFlash, self).__init__(host, device_uuid, timeout, verbose)
         flash_instruction = instruction if isinstance(instruction, SPIFlashInstruction) else SPIFlashInstruction()
-        ret = self._transfer(SPIFlashDevice(device=device, speed=speed, cpol=cpol, cpha=cpha,
-                                            page_size=page_size, chip_size=chip_size,
-                                            instruction=flash_instruction.dict))
+        ret = self._transfer(GPIOSPIFlashDevice(cs=cs, clk=clk, mosi=mosi, miso=miso,
+                                                page_size=page_size, chip_size=chip_size,
+                                                instruction=flash_instruction.dict))
         if not isinstance(ret, RaspiAckMsg) or not ret.ack:
             raise RuntimeError(ret.data)
 
