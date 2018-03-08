@@ -57,7 +57,7 @@ class SPIFlashClose(RaspiBaseMsg):
 
 
 class SPIFlashProtection(RaspiAckMsg):
-    _handle = 'protection'
+    _handle = 'hardware_write_protection'
     _properties = {'enable'}
 
     def __init__(self, **kwargs):
@@ -72,7 +72,7 @@ class SPIFlashReadChip(RaspiBaseMsg):
 
 
 class SPIFlashReadStatus(RaspiBaseMsg):
-    _handle = 'read_status'
+    _handle = 'status'
 
     def __init__(self, **kwargs):
         super(SPIFlashReadStatus, self).__init__(**kwargs)
