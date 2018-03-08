@@ -3,7 +3,8 @@ import uuid
 import hashlib
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg, get_binary_data_header
-from .spi_flash import SPIFlashInstruction, SPIFlashErase, SPIFlashClose, SPIFlashProbe, SPIFlashReadChip
+from .spi_flash import SPIFlashInstruction, SPIFlashErase, SPIFlashClose, \
+    SPIFlashProbe, SPIFlashReadChip, SPIFlashProtection, SPIFlashReadStatus
 
 
 class GPIOSPIFlashDevice(RaspiBaseMsg):
@@ -22,7 +23,6 @@ class GPIOSPIFlash(RaspiWsClient):
         """
 
         :param host: raspi-io server address
-        :param device: spi device name, such as /dev/spidev0.0
         :param page_size: spi flash page size (unit byte)
         :param chip_size: spi flash chip size (unit byte)
         :param cs: spi chip select gpio pin
@@ -64,6 +64,14 @@ class GPIOSPIFlash(RaspiWsClient):
         ret = self._transfer(SPIFlashErase())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
+    def status(self):
+        """Get spi flash status
+
+        :return: flash status register value
+        """
+        ret = self._transfer(SPIFlashReadStatus())
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else 0xffff
+
     def read_chip(self):
         """Read whole spi flash chip
 
@@ -93,3 +101,17 @@ class GPIOSPIFlash(RaspiWsClient):
             return False
 
         return True
+
+    def hardware_write_protection(self, enable):
+        """Enable / disable hardware write protection
+
+        Enable  /WP == 0 Hardware Protected
+                /WP == 1 Hardware Unprotected WEL=1 enable write
+
+        Disable Software Protection, /WP has no control WLE=1 enable write
+
+        :param enable: enable or disable hardware write protection
+        :return: success return true, failed return false
+        """
+        ret = self._transfer(SPIFlashProtection(enable=True if enable else False))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False

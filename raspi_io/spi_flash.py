@@ -3,17 +3,22 @@ import hashlib
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg, get_binary_data_header
 __all__ = ['SPIFlashInstruction', 'SPIFlashDevice', 'SPIFlashClose',
-           'SPIFlashProbe', 'SPIFlashErase', 'SPIFlashReadChip', 'SPIFlash']
+           'SPIFlashProbe', 'SPIFlashErase', 'SPIFlashReadChip', 'SPIFlashReadStatus', 'SPIFlashProtection', 'SPIFlash']
 
 
 class SPIFlashInstruction(RaspiBaseMsg):
-    _properties = {'read_id', 'read_sr', 'chip_erase', 'page_read', 'page_write', 'write_enable', 'write_disable'}
+    _properties = {'read_id', 'read_sr', 'write_sr', 'read_sr1', 'read_sr2',
+                   'chip_erase', 'page_read', 'page_write', 'write_enable', 'write_disable'}
 
     def __init__(self, **kwargs):
         # Read identification
         kwargs.setdefault('read_id', 0x9f)
         # Read status register
         kwargs.setdefault('read_sr', 0x05)
+        kwargs.setdefault('write_sr', 0x1)
+        kwargs.setdefault('read_sr1', 0x5)
+        kwargs.setdefault('read_sr2', 0x35)
+
         kwargs.setdefault('chip_erase', 0x60)
         kwargs.setdefault('page_read', 0x03)
         kwargs.setdefault('page_write', 0x2)
@@ -51,11 +56,26 @@ class SPIFlashClose(RaspiBaseMsg):
         super(SPIFlashClose, self).__init__(**kwargs)
 
 
+class SPIFlashProtection(RaspiAckMsg):
+    _handle = 'protection'
+    _properties = {'enable'}
+
+    def __init__(self, **kwargs):
+        super(SPIFlashProtection, self).__init__(**kwargs)
+
+
 class SPIFlashReadChip(RaspiBaseMsg):
     _handle = 'read_chip'
 
     def __init__(self, **kwargs):
         super(SPIFlashReadChip, self).__init__(**kwargs)
+
+
+class SPIFlashReadStatus(RaspiBaseMsg):
+    _handle = 'read_status'
+
+    def __init__(self, **kwargs):
+        super(SPIFlashReadStatus, self).__init__(**kwargs)
 
 
 class SPIFlash(RaspiWsClient):
@@ -108,6 +128,14 @@ class SPIFlash(RaspiWsClient):
         ret = self._transfer(SPIFlashErase())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
+    def status(self):
+        """Get spi flash status
+
+        :return: flash status register value
+        """
+        ret = self._transfer(SPIFlashReadStatus())
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else 0xffff
+
     def read_chip(self):
         """Read whole spi flash chip
 
@@ -137,3 +165,17 @@ class SPIFlash(RaspiWsClient):
             return False
 
         return True
+
+    def hardware_write_protection(self, enable):
+        """Enable / disable hardware write protection
+
+        Enable  /WP == 0 Hardware Protected
+                /WP == 1 Hardware Unprotected WEL=1 enable write
+
+        Disable Software Protection, /WP has no control WLE=1 enable write
+
+        :param enable: enable or disable hardware write protection
+        :return: success return true, failed return false
+        """
+        ret = self._transfer(SPIFlashProtection(enable=True if enable else False))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
