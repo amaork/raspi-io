@@ -17,10 +17,6 @@ if __name__ == "__main__":
     read_md5 = hashlib.md5(data).hexdigest()
     print("Read chip spent:{}, md5:{}".format(time.time() - start, read_md5))
 
-    # Disable hardware protection
-    if not flash.hardware_write_protection(False):
-        print("Disable hardware protection error:{}".format(flash.get_error()))
-
     # Write chip
     verify = True
     start = time.time()

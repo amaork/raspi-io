@@ -4,7 +4,7 @@ import hashlib
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg, get_binary_data_header
 from .spi_flash import SPIFlashInstruction, SPIFlashErase, SPIFlashClose, \
-    SPIFlashProbe, SPIFlashReadChip, SPIFlashProtection, SPIFlashReadStatus
+    SPIFlashProbe, SPIFlashReadChip, SPIFlashReadStatus, SPIFlashWriteStatus
 
 
 class GPIOSPIFlashDevice(RaspiBaseMsg):
@@ -64,13 +64,21 @@ class GPIOSPIFlash(RaspiWsClient):
         ret = self._transfer(SPIFlashErase())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
-    def status(self):
+    def read_status(self):
         """Get spi flash status
 
         :return: flash status register value
         """
         ret = self._transfer(SPIFlashReadStatus())
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else 0xffff
+
+    def write_status(self, status):
+        """Write spi flash status
+
+        :return: success return true, failed return false
+        """
+        ret = self._transfer(SPIFlashWriteStatus(status=status))
+        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
     def read_chip(self):
         """Read whole spi flash chip
@@ -101,17 +109,3 @@ class GPIOSPIFlash(RaspiWsClient):
             return False
 
         return True
-
-    def hardware_write_protection(self, enable):
-        """Enable / disable hardware write protection
-
-        Enable  /WP == 0 Hardware Protected
-                /WP == 1 Hardware Unprotected WEL=1 enable write
-
-        Disable Software Protection, /WP has no control WLE=1 enable write
-
-        :param enable: enable or disable hardware write protection
-        :return: success return true, failed return false
-        """
-        ret = self._transfer(SPIFlashProtection(enable=True if enable else False))
-        return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
