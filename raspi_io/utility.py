@@ -48,7 +48,7 @@ def scan_server(timeout=0.04):
             ws = websocket.create_connection("ws://{}:{}".format(address, DEFAULT_PORT), timeout=timeout)
             ws.close()
             return address
-        except (websocket.WebSocketTimeoutException, socket.timeout):
+        except (websocket.WebSocketTimeoutException, socket.error, OSError):
             return None
 
     def connect_worker():
