@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
-__all__ = ['I2C', 'I2CDevice' 'I2CRead', 'I2CWrite']
+__all__ = ['I2C', 'I2CDevice', 'I2CRead', 'I2CWrite']
 
 
 class I2CRead(RaspiBaseMsg):

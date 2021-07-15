@@ -48,7 +48,6 @@ class RaspiBaseMsg(object):
 
     def __init__(self, **kwargs):
         kwargs.setdefault('handle', self._handle)
-
         try:
 
             for key in self._properties:

@@ -15,18 +15,24 @@ class RaspiWsClient(object):
     PATH = ""
 
     def __init__(self, host, node, timeout=1, verbose=1):
-        try:
+        """RaspiWsClient
 
+        :param host: raspberry address such as "192.168.1.100"
+        :param node: node name such as "GPIO"/"I2C"
+        :param timeout: timeout in seconds
+        :param verbose: verbose message level
+        """
+        try:
             self.__error = ""
             self.__verbose = verbose
             # First using default port apply for a dynamic port
-            require_addr = (host, DEFAULT_PORT)
-            ws = websocket.create_connection(get_websocket_url(require_addr, self.PATH, node), timeout)
+            require_address = (host, DEFAULT_PORT)
+            ws = websocket.create_connection(get_websocket_url(require_address, self.PATH, node), timeout)
             ack = json.loads(ws.recv())
 
             # Second using first step acquired port connect server
-            dynamic_addr = (host, RaspiAckMsg(**ack).data)
-            self._ws = websocket.create_connection(get_websocket_url(dynamic_addr, self.PATH, node), timeout)
+            dynamic_address = (host, RaspiAckMsg(**ack).data)
+            self._ws = websocket.create_connection(get_websocket_url(dynamic_address, self.PATH, node), timeout)
         except socket.error as err:
             raise RaspiSocketError(err)
         except (ValueError, TypeError):

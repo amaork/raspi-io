@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import uuid
+from abc import abstractmethod
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode', 'GPIOCleanup',
            'SoftSPI', 'GPIOSoftSPI', 'GPIOSoftSPIXfer', 'GPIOSoftSPIRead', 'GPIOSoftSPIWrite',
-           'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl']
+           'SoftPWM', 'GPIOSoftPWM', 'GPIOSoftPWMCtrl', 'GPIOTimingContentManager']
 
 
 class GPIOMode(RaspiBaseMsg):
@@ -157,6 +158,11 @@ class GPIO(RaspiWsClient):
             pass
 
     def setmode(self, mode):
+        """Set GPIO mode
+
+        :param mode: GPIOMode.BCM or GPIOMode.BOARD
+        :return: success return True failed return False
+        """
         ret = self._transfer(GPIOMode(mode=mode))
         return True if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
@@ -176,6 +182,14 @@ class GPIO(RaspiWsClient):
         return True if isinstance(ret, RaspiAckMsg) and ret.ack else False
 
     def setup(self, channel, direction, pull_up_down=PUD_OFF, initial=LOW):
+        """Setup channel mode
+
+        :param channel: could be a single pin or multi-pin (list)
+        :param direction: pin direction IN or OUT
+        :param pull_up_down: PUD_UP/PUD_OFF/PUD_DOWN
+        :param initial: initial state
+        :return: success return true, failed return false
+        """
         ret = self._transfer(
             GPIOSetup(channel=channel, direction=direction, pull_up_down=pull_up_down, initial=initial)
         )
@@ -267,3 +281,43 @@ class SoftSPI(RaspiWsClient):
     def close(self):
         ret = self._transfer(GPIOCleanup(channel=self.channel))
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else False
+
+
+class GPIOTimingContentManager(object):
+    def __init__(self, gpio, start, end, verbose=False, ignoreException=False):
+        """Using content manager control gpio timing
+
+        :param gpio: GPIO instance will pass to start and end callback
+        :param start: start timing callback
+        :param end: end timing callback
+        :param verbose: show verbose info
+        :param ignoreException: ignore exception or not
+        """
+        if not isinstance(gpio, GPIO):
+            raise TypeError('{!} required {!r} type'.format('gpio', GPIO.__name__))
+
+        if not callable(start):
+            raise TypeError('{!} required {!r} type'.format('start', 'callable'))
+
+        if not callable(end):
+            raise TypeError('{!} required {!r} type'.format('end', 'callable'))
+
+        self.gpio = gpio
+        self._end = end
+        self._start = start
+        self._verbose = verbose
+        self._ignoreException = ignoreException
+
+    def __enter__(self):
+        if self._verbose:
+            print('Start timing')
+
+        self._start(self.gpio)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._verbose:
+            print('End timing')
+
+        self._end(self.gpio)
+        return self._ignoreException
