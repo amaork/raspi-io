@@ -52,27 +52,29 @@ raspi_io.core.DEFAULT_PORT = 39876
 
 ## Interface
     Query: query raspi info
-
+    
     GPIO: usage same as RPi.GPIO
-
+    
     SoftPWM: usage same as RPi.GPIO.PWM
-
-    SoftSPI: Software spi controller support read/write/xfer
-
+    
+    SoftSPI: software spi controller support read/write/xfer
+    
     Serial: support read/write/close/flushInput/flushOutput
-
+    
     I2C: support open/read/write/ioctl_read/ioctl_write
-
+    
     SPI: support open/close/read/write/xfer/xfer2
-
+    
     SPIFlash support probe/erase/read_chip/write_chip
-
+    
     GPIOSPIFlash support probe/erase/read_chip/write_chip
-
+    
     MmalGraph: display image on LCD or HDMI
-
+    
     TVService: raspberry pi video setting, set HDMI mode
-
+    
+    UpdateAgent: software update agent support upload from local or online (check and get from gogs repository releases)
+    
     RaspberryManager: create RaspiWsClient instance
 
 ## RaspberryManager
@@ -282,4 +284,32 @@ time.sleep(3)
 tv.power_off()
 ```
 
+## UpdateAgent
+
+```python
+import json
+from raspi_io import UpdateAgent
+from raspi_io.utility import scan_server
+
+
+
+raspberry_pi = scan_server()[0]
+
+# Load auth from json an get software name
+auth = json.loads(open('auth.json', 'rb').read())
+software_name = auth.pop("software_name")
+
+# Create a software update agent instance
+agent = UpdateAgent(raspberry_pi, timeout=30)
+
+# Online fetch software newest release
+release = agent.fetch(auth, software_name)
+print(release)
+
+# Online update
+print(agent.download(auth, release, '/tmp'))
+
+# Local update
+print(agent.update_from_local("release.tar", "/tmp"))
+```
 

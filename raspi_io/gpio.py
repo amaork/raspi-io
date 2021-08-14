@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import uuid
-from abc import abstractmethod
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
 __all__ = ['GPIO', 'GPIOEvent', 'GPIOChannel', 'GPIOCtrl', 'GPIOSetup', 'GPIOMode', 'GPIOCleanup',

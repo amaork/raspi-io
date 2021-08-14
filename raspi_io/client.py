@@ -6,8 +6,8 @@ import base64
 import socket
 import hashlib
 import websocket
-from .core import RaspiBaseMsg, RaspiAckMsg, RaspiMsgDecodeError, RaspiSocketError, RaspiBinaryDataHeader, \
-    DEFAULT_PORT, DATA_TRANSFER_BLOCK_SIZE, get_websocket_url
+from .core import RaspiBaseMsg, RaspiAckMsg, RaspiException, RaspiMsgDecodeError, RaspiSocketError, \
+    RaspiBinaryDataHeader, DEFAULT_PORT, DATA_TRANSFER_BLOCK_SIZE, get_websocket_url
 __all__ = ['RaspiWsClient', 'RaspberryManager']
 
 
@@ -46,6 +46,16 @@ class RaspiWsClient(object):
     def _output(self, msg):
         if self.__verbose >= 2:
             print(msg)
+
+    @staticmethod
+    def check_result(result):
+        if not isinstance(result, RaspiAckMsg):
+            raise RaspiException("Is not an valid {!r}".format(RaspiAckMsg.__name__))
+
+        if not result.ack:
+            raise RaspiException(result.data)
+
+        return result.data
 
     @staticmethod
     def encode_binary(data):

@@ -3,7 +3,8 @@ import json
 import hashlib
 __all__ = ['get_websocket_url', 'get_binary_data_header',
            'RaspiBaseMsg', 'RaspiAckMsg', 'RaspiBinaryDataHeader',
-           'RaspiMsgDecodeError', 'RaspiSocketError', 'DEFAULT_PORT', 'DATA_TRANSFER_BLOCK_SIZE']
+           'RaspiException', 'RaspiMsgDecodeError', 'RaspiSocketError',
+           'DEFAULT_PORT', 'DATA_TRANSFER_BLOCK_SIZE']
 DEFAULT_PORT = 9876
 DATA_TRANSFER_BLOCK_SIZE = 512 * 1024
 
@@ -34,11 +35,15 @@ def get_binary_data_header(data, fmt="bin", handle=""):
     return RaspiBinaryDataHeader(size=size, md5=md5, slices=slices, format=fmt, handle=handle)
 
 
-class RaspiMsgDecodeError(Exception):
+class RaspiException(Exception):
     pass
 
 
-class RaspiSocketError(Exception):
+class RaspiSocketError(RaspiException):
+    pass
+
+
+class RaspiMsgDecodeError(RaspiException):
     pass
 
 
