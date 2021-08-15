@@ -291,8 +291,6 @@ import json
 from raspi_io import UpdateAgent
 from raspi_io.utility import scan_server
 
-
-
 raspberry_pi = scan_server()[0]
 
 # Load auth from json an get software name

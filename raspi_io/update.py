@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import os.path
 from .client import RaspiWsClient
-from .core import RaspiBaseMsg, RaspiException, get_binary_data_header, RaspiMsgDecodeError
+from .core import RaspiBaseMsg, RaspiException, RaspiMsgDecodeError
 __all__ = ['UpdateAuth', 'UpdateFetch', 'UpdateDownload', 'UpdateFromLocal', 'UpdateAgent']
 
 
@@ -74,19 +73,8 @@ class UpdateAgent(RaspiWsClient):
         :param path: software update path
         :return: success return true
         """
-        try:
-            with open(software, 'rb') as fp:
-                data = fp.read()
-
-            fmt = os.path.splitext(software)[-1][1:]
-            header = get_binary_data_header(data, fmt, 'receive_binary_file')
-        except IOError as e:
-            raise RaspiException("Send file error: {}".format(e))
-
-        # First send local update file
-        if not self._send_binary_data(header, data):
-            raise RaspiException("Send file error: {}".format(self.get_error()))
+        # First send local update file to remote
+        filename = self.send_binary_file(software)
 
         # Request update and get software release info
-        result = self._transfer(UpdateFromLocal(filename="{}.{}".format(header.md5, fmt), update_path=path))
-        return self.check_result(result)
+        return self.check_result(self._transfer(UpdateFromLocal(filename=filename, update_path=path)))

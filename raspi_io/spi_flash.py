@@ -164,7 +164,7 @@ class SPIFlash(RaspiWsClient):
             self._error("Erase chip error:{}".format(self.get_error()))
             return False
         # Second write data to chip
-        if not self._send_binary_data(get_binary_data_header(data, handle="write_chip"), data):
+        if not self.send_binary_data(get_binary_data_header(data, handle="write_chip"), data):
             self._error("Write chip error:{}".format(self.get_error()))
             return False
 

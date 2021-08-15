@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import os
 import sys
 import json
 import base64
@@ -7,12 +8,13 @@ import socket
 import hashlib
 import websocket
 from .core import RaspiBaseMsg, RaspiAckMsg, RaspiException, RaspiMsgDecodeError, RaspiSocketError, \
-    RaspiBinaryDataHeader, DEFAULT_PORT, DATA_TRANSFER_BLOCK_SIZE, get_websocket_url
+    RaspiBinaryDataHeader, DEFAULT_PORT, DATA_TRANSFER_BLOCK_SIZE, get_websocket_url, get_binary_data_header
 __all__ = ['RaspiWsClient', 'RaspberryManager']
 
 
 class RaspiWsClient(object):
     PATH = ""
+    RECEIVE_BINARY_FILE_HANDLE = 'receive_binary_file'
 
     def __init__(self, host, node, timeout=1, verbose=1):
         """RaspiWsClient
@@ -214,15 +216,15 @@ class RaspiWsClient(object):
             return None
 
     def _send_binary_data(self, header, data):
-        """Send binary data to raspi io server
+        """Send binary data to server and get name
 
         1. send binary data header to server
         2. send binary data piece by piece
         3. wait ack
 
         :param header: binary data header
-        :param data: graph data
-        :return: success, return True
+        :param data: binary data
+        return RaspiAckMsg
         """
         try:
 
@@ -249,10 +251,7 @@ class RaspiWsClient(object):
             self._output("Recv:{}".format(data))
 
             # Check ack message
-            if not ack.ack:
-                self._error("{}".format(ack.data))
-
-            return ack.ack
+            return ack
         except (TypeError, RuntimeError) as err:
             self._error("{}".format(err))
             return None
@@ -262,6 +261,29 @@ class RaspiWsClient(object):
         except websocket.WebSocketException as err:
             self._error("{}".format(err))
             return None
+
+    def send_binary_data(self, header, data):
+        ack = self._send_binary_data(header, data)
+        if not ack.ack:
+            self._error("{}".format(ack.data))
+
+        return ack.ack
+
+    def send_binary_file(self, filepath):
+        try:
+            with open(filepath, 'rb') as fp:
+                data = fp.read()
+        except IOError as e:
+            raise RaspiException("Read file error: {}".format(e))
+
+        # First get file header
+        fmt = os.path.splitext(filepath)[-1][1:]
+        result = self._send_binary_data(get_binary_data_header(data, fmt, handle=self.RECEIVE_BINARY_FILE_HANDLE), data)
+        if not result.ack:
+            raise RaspiException("Send file error: {}".format(result.data))
+
+        # Return remote filename
+        return result.data
 
 
 class RaspberryManager(object):

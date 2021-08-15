@@ -100,7 +100,7 @@ class MmalGraph(RaspiWsClient):
                 data = fp.read()
 
             # First transfer header info
-            if self._send_binary_data(get_binary_data_header(data, fmt, "open"), data):
+            if self.send_binary_data(get_binary_data_header(data, fmt, "open"), data):
                 self.__uri = path
                 return True
             else:
