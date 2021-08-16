@@ -121,7 +121,7 @@ class Serial(RaspiWsClient):
         :return: result, data or error
         """
         ret = self._transfer(SerialRead(size=size))
-        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else ""
+        return self.decode_binary(ret.data) if isinstance(ret, RaspiAckMsg) and ret.ack else bytes()
 
     def write(self, data):
         """Write data to serial port
