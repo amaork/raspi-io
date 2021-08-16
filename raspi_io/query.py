@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from .version import version
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
-__all__ = ['Query', 'QueryDevice', 'QueryHardware']
+__all__ = ['Query', 'QueryDevice', 'QueryHardware', 'QueryVersion']
 
 
 class QueryHardware(RaspiBaseMsg):
@@ -30,6 +31,16 @@ class QueryDevice(RaspiBaseMsg):
         super(QueryDevice, self).__init__(**kwargs)
 
 
+class QueryVersion(RaspiBaseMsg):
+    _handle = 'query_version'
+    _properties = {'server', 'client'}
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('server', '')
+        kwargs.setdefault('client', version)
+        super(QueryVersion, self).__init__(**kwargs)
+
+
 class Query(RaspiWsClient):
     PATH = __name__.split(".")[-1]
 
@@ -39,6 +50,9 @@ class Query(RaspiWsClient):
     def basic_query(self, query):
         ret = self._transfer(query)
         return ret.data if isinstance(ret, RaspiAckMsg) and ret.ack else None
+
+    def get_version(self):
+        return self.basic_query(QueryVersion())
 
     def get_hardware_info(self):
         """Query raspi hardware info

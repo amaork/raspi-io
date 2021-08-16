@@ -91,6 +91,10 @@ class RaspiBaseMsg(object):
     def dict(self):
         return self.__dict__.copy()
 
+    @classmethod
+    def properties(cls):
+        return list(cls._properties)
+
     def dumps(self):
         """Encode data to a dict string
 

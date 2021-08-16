@@ -10,8 +10,9 @@ from .spi import SPI
 from .update import UpdateAgent
 from .core import RaspiSocketError
 from .client import RaspberryManager
+from .version import version
 __all__ = ['RaspberryManager', 'RaspiSocketError',
            'GPIO', 'SoftPWM', 'GPIOTimingContentManager',
-           'TVService', 'MmalGraph',
+           'TVService', 'MmalGraph', 'version',
            'Serial', 'Query', 'I2C', 'UpdateAgent',
            'SPI', 'SoftSPI', 'SPIFlash', 'GPIOSPIFlash']

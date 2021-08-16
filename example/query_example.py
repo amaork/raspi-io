@@ -6,6 +6,7 @@ import raspi_io.utility as utility
 if __name__ == "__main__":
     q = Query(utility.scan_server()[0])
     print("Hardware info:{}".format(q.get_hardware_info()))
+    print("Software info:{}".format(q.get_version()))
     for iface in q.get_iface_list():
         print("Ethernet interface:{}:{}".format(iface, q.get_ethernet_addr(iface)))
     print("I2C device list:{}".format(q.get_i2c_list()))

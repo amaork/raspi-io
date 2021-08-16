@@ -12,6 +12,7 @@ if __name__ == "__main__":
     # Load auth from json an get software name
     auth = json.loads(open('auth.json', 'rb').read())
     software_name = auth.pop("software_name")
+    software_install = auth.pop("software_install")
 
     # Create a software update agent instance
     agent = UpdateAgent(raspberry_pi, timeout=30)
@@ -25,3 +26,5 @@ if __name__ == "__main__":
 
     # Local update
     print(agent.update_from_local("release.tar", "/tmp"))
+
+    print(agent.get_software_version(*tuple(software_install)))

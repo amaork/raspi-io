@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiException, RaspiMsgDecodeError
-__all__ = ['UpdateAuth', 'UpdateFetch', 'UpdateDownload', 'UpdateFromLocal', 'UpdateAgent']
+__all__ = ['UpdateAuth', 'UpdateFetch', 'UpdateDownload', 'UpdateFromLocal',
+           'UpdateAgent', 'SoftwareVersion', 'SoftwareDesc']
 
 
 class UpdateAuth(RaspiBaseMsg):
@@ -22,6 +23,15 @@ class UpdateDownload(RaspiBaseMsg):
 class UpdateFromLocal(RaspiBaseMsg):
     _handle = 'update_from_local'
     _properties = {'filename', 'update_path'}
+
+
+class SoftwareDesc(RaspiBaseMsg):
+    _handle = 'get_software_version'
+    _properties = {'name', 'install_path'}
+
+
+class SoftwareVersion(RaspiBaseMsg):
+    _properties = {'name', 'version', 'release_date', 'md5', 'state'}
 
 
 class UpdateAgent(RaspiWsClient):
@@ -78,3 +88,12 @@ class UpdateAgent(RaspiWsClient):
 
         # Request update and get software release info
         return self.check_result(self._transfer(UpdateFromLocal(filename=filename, update_path=path)))
+
+    def get_software_version(self, name, install_path):
+        """Get software version and release data
+
+        :param name: software name
+        :param install_path: software install path
+        :return: success return SoftwareVersion
+        """
+        return self.check_result(self._transfer(SoftwareDesc(name=name, install_path=install_path)))
