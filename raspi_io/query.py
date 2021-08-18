@@ -2,7 +2,7 @@
 from .version import version
 from .client import RaspiWsClient
 from .core import RaspiBaseMsg, RaspiAckMsg
-__all__ = ['Query', 'QueryDevice', 'QueryHardware', 'QueryVersion']
+__all__ = ['Query', 'QueryDevice', 'QueryHardware', 'QueryVersion', 'RebootSystem']
 
 
 class QueryHardware(RaspiBaseMsg):
@@ -39,6 +39,11 @@ class QueryVersion(RaspiBaseMsg):
         kwargs.setdefault('server', '')
         kwargs.setdefault('client', version)
         super(QueryVersion, self).__init__(**kwargs)
+
+
+class RebootSystem(RaspiBaseMsg):
+    _handle = 'reboot'
+    _properties = {'delay'}
 
 
 class Query(RaspiWsClient):
@@ -104,3 +109,11 @@ class Query(RaspiWsClient):
         :return: query data
         """
         return self.basic_query(QueryDevice(query=QueryDevice.FILTER, filter=query_filter))
+
+    def reboot_system(self, delay=3):
+        """Reboot system after delay specified seconds
+
+        :param delay: delay how many seconds, system will reboot
+        :return:
+        """
+        return self.check_result(self._transfer(RebootSystem(delay=delay)))

@@ -8,11 +8,14 @@ from .query import Query
 from .i2c import I2C
 from .spi import SPI
 from .update import UpdateAgent
-from .core import RaspiSocketError
+from .wireless import Wireless
+from .core import RaspiException, RaspiSocketError, RaspiMsgDecodeError
 from .client import RaspberryManager
 from .version import version
-__all__ = ['RaspberryManager', 'RaspiSocketError',
+__all__ = ['version',
+           'RaspberryManager', 'UpdateAgent', 'Wireless',
+           'RaspiException', 'RaspiSocketError', 'RaspiMsgDecodeError',
            'GPIO', 'SoftPWM', 'GPIOTimingContentManager',
-           'TVService', 'MmalGraph', 'version',
-           'Serial', 'Query', 'I2C', 'UpdateAgent',
+           'TVService', 'MmalGraph',
+           'Serial', 'Query', 'I2C',
            'SPI', 'SoftSPI', 'SPIFlash', 'GPIOSPIFlash']
