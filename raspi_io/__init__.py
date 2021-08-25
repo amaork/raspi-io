@@ -7,15 +7,15 @@ from .serial import Serial
 from .query import Query
 from .i2c import I2C
 from .spi import SPI
-from .update import UpdateAgent
+from .app_manager import AppManager
 from .wireless import Wireless
 from .core import RaspiException, RaspiSocketError, RaspiMsgDecodeError
 from .client import RaspberryManager
 from .version import version
 __all__ = ['version',
-           'RaspberryManager', 'UpdateAgent', 'Wireless',
+           'RaspberryManager', 'AppManager',
            'RaspiException', 'RaspiSocketError', 'RaspiMsgDecodeError',
            'GPIO', 'SoftPWM', 'GPIOTimingContentManager',
            'TVService', 'MmalGraph',
-           'Serial', 'Query', 'I2C',
+           'Serial', 'Query', 'I2C', 'Wireless',
            'SPI', 'SoftSPI', 'SPIFlash', 'GPIOSPIFlash']

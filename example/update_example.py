@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 import json
-from raspi_io import UpdateAgent
+from raspi_io import AppManager
 from raspi_io.utility import scan_server
 
 
@@ -9,22 +9,24 @@ if __name__ == "__main__":
     # Get raspberry address
     raspberry_pi = scan_server()[0]
 
-    # Load auth from json an get software name
+    # Load auth from json an get app name and online update repo name
     auth = json.loads(open('auth.json', 'rb').read())
-    software_name = auth.pop("software_name")
-    software_install = auth.pop("software_install")
 
-    # Create a software update agent instance
-    agent = UpdateAgent(raspberry_pi, timeout=30)
+    app_name = auth.pop("app_name")
+    online_update_repo = auth.pop("online_update_repo")
 
-    # Online fetch software newest release
-    release = agent.fetch(auth, software_name)
+    # Create a AppManager instance
+    agent = AppManager(raspberry_pi, timeout=30)
+
+    # Online fetch app newest release
+    release = agent.fetch_update(auth, online_update_repo)
     print(release)
 
     # Online update
-    print(agent.download(auth, release, '/tmp'))
+    print(agent.online_update(auth, release, app_name))
 
     # Local update
-    print(agent.update_from_local("release.tar", "/tmp"))
+    print(agent.local_update("release.tar", app_name))
 
-    print(agent.get_software_version(*tuple(software_install)))
+    for app_name in agent.get_app_list():
+        print(agent.get_app_state(app_name))
