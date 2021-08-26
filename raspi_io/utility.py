@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import ifaddr
 import socket
+import ipaddress
 import websocket
 from .core import DEFAULT_PORT
 
@@ -13,28 +15,58 @@ try:
     from queue import Queue
 except ImportError:
     from Queue import Queue
-__all__ = ['get_host_address', 'scan_server']
+__all__ = ['get_host_address', 'scan_server', 'get_system_nic']
 
 
 def get_host_address():
     """
     Get host address
-    :return:
+    :return: address list
     """
-    try:
+    address_list = set()
+    for name, interface in get_system_nic().items():
+        if 'VMware' in name or 'VirtualBox' in name:
+            continue
 
-        for addr in socket.gethostbyname_ex(socket.gethostname())[2]:
-            if not addr.startswith("127."):
-                return addr
+        if interface.get('network_prefix') != 24:
+            continue
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 53))
-        return s.getsockname()[0]
-    except socket.error:
-        return socket.gethostbyname(socket.gethostname())
+        address_list.add(interface.get('ip'))
+
+    return list(address_list)
 
 
-def scan_server(timeout=0.04):
+def get_system_nic(ignore_loopback=True):
+    """Get system network interface controller
+
+    :param ignore_loopback: if set will ignore loopback nic
+    :return: dict, {nic_name: nic_attribute}
+    """
+    interfaces = dict()
+    adapters = ifaddr.get_adapters()
+    for adapter in adapters:
+        for ip in adapter.ips:
+            try:
+                address = ipaddress.ip_address("{}".format(ip.ip))
+
+                if ignore_loopback and address.is_loopback:
+                    continue
+
+                if address.version == 4:
+                    network = ipaddress.ip_network("{}/{}".format(address, ip.network_prefix), False)
+                    interfaces[adapter.nice_name] = dict(
+                        ip=str(address),
+                        network=str(network),
+                        network_prefix=ip.network_prefix
+                    )
+                    break
+            except ValueError:
+                continue
+
+    return interfaces
+
+
+def scan_server(timeout=0.05):
     """Scan lan raspi_io server
 
     :param timeout: scan timeout
@@ -58,15 +90,28 @@ def scan_server(timeout=0.04):
             finally:
                 in_queue.task_done()
 
-    # Generate lan host list
-    network_seg = ".".join(get_host_address().split(".")[:-1])
-    all_host = ["{}.{}".format(network_seg, i) for i in range(255)]
+    # Get system all network interface controller
+    valid_network = list()
+    for name, interface in get_system_nic().items():
+        if 'VMware' in name or 'VirtualBox' in name:
+            continue
+
+        if interface.get('network_prefix') != 24:
+            continue
+
+        valid_network.append(interface.get('network'))
+
+    # According to network generate host list
+    all_host = list()
+    for network in valid_network:
+        network = ipaddress.ip_network(network)
+        all_host.extend([str(x) for x in network.hosts()])
 
     try:
         # Python3 using thread pool
         with concurrent.futures.ThreadPoolExecutor() as pool:
             valid_host = filter(lambda x: x is not None, pool.map(connect_device, all_host))
-        return list(valid_host)
+        return list(set(valid_host))
     except NameError:
         # Python 2 using thread + queue
         map(in_queue.put, all_host)

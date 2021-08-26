@@ -36,5 +36,5 @@ setuptools.setup(
         'Programming Language :: Python :: 3',
     ],
     packages=packages,
-    install_requires=['websocket_client==0.37', 'pyserial', 'Pillow']
+    install_requires=['websocket_client==0.37', 'pyserial', 'Pillow', 'ipaddr']
 )
