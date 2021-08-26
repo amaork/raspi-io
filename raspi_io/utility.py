@@ -91,7 +91,7 @@ def scan_server(timeout=0.05):
                 in_queue.task_done()
 
     # Get system all network interface controller
-    valid_network = list()
+    valid_network = set()
     for name, interface in get_system_nic().items():
         if 'VMware' in name or 'VirtualBox' in name:
             continue
@@ -99,7 +99,7 @@ def scan_server(timeout=0.05):
         if interface.get('network_prefix') != 24:
             continue
 
-        valid_network.append(interface.get('network'))
+        valid_network.add(interface.get('network'))
 
     # According to network generate host list
     all_host = list()
@@ -107,11 +107,14 @@ def scan_server(timeout=0.05):
         network = ipaddress.ip_network(network)
         all_host.extend([str(x) for x in network.hosts()])
 
+    # This sentence is useless, but it can fix PyInstaller raise LookupError: unknown encoding: idna @socket.py
+    socket.gethostbyname_ex(socket.gethostname())
+
     try:
         # Python3 using thread pool
         with concurrent.futures.ThreadPoolExecutor() as pool:
             valid_host = filter(lambda x: x is not None, pool.map(connect_device, all_host))
-        return list(set(valid_host))
+        return list(valid_host)
     except NameError:
         # Python 2 using thread + queue
         map(in_queue.put, all_host)
