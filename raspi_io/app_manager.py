@@ -109,23 +109,23 @@ class AppManager(RaspiWsClient):
         :param auth: gogs server auth
         :param repo_name: software update repo name on server
         :param newest: if set only fetch newest software info
-        :return: success return software release info dict else None
+        :return: success return a tuple(repo release info dict, software release info dict) else None
         """
         self.check_auth(auth)
         return self.check_result(self._transfer(FetchUpdate(auth=auth, repo_name=repo_name, newest=newest)))
 
-    def online_update(self, auth, release, app_name, timeout=300):
+    def online_update(self, auth, repo_release_info, app_name, timeout=300):
         """Online download software release and update
 
         :param auth: gogs server auth
-        :param release: software release info, get it from online_fetch_update()
+        :param repo_release_info: repo release info, get it from online_fetch_update()[0]
         :param app_name: app name to upgrade
         :param timeout: download timeout in seconds
         :return: success return software release info
         """
         self.check_auth(auth)
         return self.check_result(self._transfer(
-            OnlineUpdate(auth=auth, release=release, app_name=app_name, timeout=timeout)
+            OnlineUpdate(auth=auth, release=repo_release_info, app_name=app_name, timeout=timeout)
         ))
 
     def local_update(self, package, app_name):

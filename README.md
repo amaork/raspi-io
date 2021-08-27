@@ -304,11 +304,12 @@ online_update_repo = auth.pop("online_update_repo")
 agent = AppManager(raspberry_pi, timeout=30)
 
 # Online fetch app newest release
-release = agent.fetch_update(auth, online_update_repo)
-print(release)
+repo_release_info, software_release_info = agent.fetch_update(auth, online_update_repo)
+print(repo_release_info)
+print(software_release_info)
 
 # Online update
-print(agent.online_update(auth, release, app_name))
+print(agent.online_update(auth, repo_release_info, app_name))
 
 # Local update
 print(agent.local_update("release.tar", app_name))
